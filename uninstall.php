@@ -3,4 +3,4 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     die;
 }
 
-delete_option( 'litesurveys_site_id' );
+delete_option( 'litesurveys_settings' );
