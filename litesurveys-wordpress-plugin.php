@@ -94,11 +94,11 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 *
 		 * @since 1.0.0
 		 */
-		public static function litesurveys_settings_site_id_callback() {
+		public static function litesurveys_settings_site_id_callback($args) {
 			$options = get_option( 'litesurveys_settings' );
 			print_r($options);
 			?>
-			<input type="text" value="<?php esc_attr($options['site_id']); ?>">
+			<input id=<?php echo esc_attr( $args['label_for'] ); ?> type="text" value="<?php echo esc_attr($options['site_id']); ?>">
 			<?php
 		}
 
