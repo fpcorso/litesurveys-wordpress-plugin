@@ -96,9 +96,9 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 */
 		public static function litesurveys_settings_site_id_callback($args) {
 			$options = get_option( 'litesurveys_settings' );
-			echo $options;
+			print_r($options);
 			?>
-			<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr($options['site_id']); ?>">
+			<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr($options[$args['label_for']]); ?>">
 			<?php
 		}
 
@@ -112,12 +112,6 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 				return;
 			}
 
-			if ( isset( $_GET['settings-updated'] ) ) {
-				add_settings_error( 'litesurveys_messages', 'litesurveys_messages', 'Settings Saved', 'updated' );
-			}
-		
-			// show error/update messages
-			settings_errors( 'litesurveys_messages' );
 			?>
 			<div class="wrap">
 				<h1>LiteSurveys Integration</h1>
