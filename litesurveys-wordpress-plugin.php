@@ -41,8 +41,12 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 * @since 1.0.0
 		 */
 		public static function load_hooks() {
-			add_action( 'admin_menu', array( __CLASS__, 'setup_admin_menu' ) );
-			add_action( 'admin_init', array( __CLASS__, 'admin_init' ) );
+			if (is_admin()) {
+				add_action( 'admin_menu', array( __CLASS__, 'setup_admin_menu' ) );
+				add_action( 'admin_init', array( __CLASS__, 'admin_init' ) );
+			}
+			
+			add_action('wp_footer', array( __CLASS__, 'add_script' ), 50);
 		}
 
 		/**
@@ -65,7 +69,7 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 				'litesurveys',
 				'litesurveys_settings_section',
 				array(
-					'label_for'         => 'litesurveys_site_id',
+					'label_for'         => 'site_id',
 					'class'             => 'wporg_row',
 				)
 			);
@@ -123,6 +127,64 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 				</form>
 			</div>
 			<?php
+		}
+
+		/**
+		 * Adds the LiteSurveys script to the website
+		 *
+		 * @since 1.0.0
+		 */
+		public static function add_script() {
+			$site_id = self::get_site_id();
+			if (empty( $site_id ) ) {
+				return;
+			}
+
+			?>
+			<script src="" id="litesurvey-js" data-site-id="<?php echo esc_attr($site_id); ?>"></script>
+			<?php
+		}
+
+		/**
+		 * Retrieves the saved site id setting
+		 *
+		 * @since 1.0.0
+		 * @return string
+		 */
+		private static function get_site_id() {
+			return self::get_setting('site_id', '');
+		}
+
+		/**
+		 * Retrieves a specific plugin setting
+		 *
+		 * @since 1.0.0
+		 * @param string $setting Which setting to retrieve.
+		 * @param mixed  $default The value to return if setting does not exist.
+		 * @return mixed
+		 */
+		private static function get_setting($setting, $default = false) {
+			$settings = self::get_settings();
+			if ( isset( $settings[$setting] ) ) {
+				return $settings[$setting];
+			}
+
+			return $default;
+		}
+
+		/**
+		 * Retrieves our plugin settings
+		 *
+		 * @since 1.0.0
+		 * @return array Our settings
+		 */
+		private static function get_settings() {
+			$settings = get_option( 'litesurveys_settings', [] );
+			if (! is_array( $settings ) ) {
+				$settings = [];
+			}
+
+			return $settings;
 		}
 	}
 
