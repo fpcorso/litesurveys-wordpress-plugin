@@ -90,7 +90,9 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 * @since 1.0.0
 		 */
 		public static function litesurveys_settings_section_callback() {
-
+			?>
+			<p>SOME INSTRUCTIONS!</p>
+			<?php
 		}
 
 		/**
@@ -102,6 +104,7 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 			$options = get_option( 'litesurveys_settings' );
 			?>
 			<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr($options[$args['label_for']]); ?>">
+			<p>(Leave blank to disable)</p>
 			<?php
 		}
 
