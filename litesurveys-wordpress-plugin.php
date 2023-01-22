@@ -77,7 +77,7 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 * @since 1.0.0
 		 */
 		public static function setup_admin_menu() {
-			add_management_page( 'LiteSurveys', 'LiteSurveys', 'manage_options', 'litesurveys', array( __CLASS__, 'generate_admin_page' ) );
+			add_options_page( 'LiteSurveys', 'LiteSurveys', 'manage_options', 'litesurveys', array( __CLASS__, 'generate_admin_page' ) );
 		}
 
 		/**
