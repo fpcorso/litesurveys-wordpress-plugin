@@ -101,9 +101,9 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 * @since 1.0.0
 		 */
 		public static function litesurveys_settings_site_id_callback($args) {
-			$options = get_option( 'litesurveys_settings' );
+			$site_id = self::get_site_id();
 			?>
-			<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr($options[$args['label_for']]); ?>">
+			<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr( $site_id ); ?>">
 			<p>(Leave blank to disable)</p>
 			<?php
 		}
@@ -139,7 +139,7 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 */
 		public static function add_script() {
 			$site_id = self::get_site_id();
-			if (empty( $site_id ) ) {
+			if ( empty( $site_id ) ) {
 				return;
 			}
 
