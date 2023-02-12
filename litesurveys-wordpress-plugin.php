@@ -144,7 +144,7 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 			}
 
 			?>
-			<script src="https://litesurveys-static-files.nyc3.cdn.digitaloceanspaces.com/embed-files%2Flitesurvey.js" id="litesurvey-js" data-site-id="<?php echo esc_attr($site_id); ?>"></script>
+			<script src="https://litesurveys-static-files.nyc3.digitaloceanspaces.com/embed-files%2Flitesurvey.js" id="litesurvey-js" data-site-id="<?php echo esc_attr($site_id); ?>"></script>
 			<?php
 		}
 
