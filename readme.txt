@@ -27,7 +27,7 @@ You can use LiteSurveys to:
 
 ## Some Features of LiteSurveys:
 
-* **Question Type Variety** - Select from over a dozen question types including drop downs, open answer, and more.
+* **Question Type Variety** - Select from a variety question types including multiple choice, open answer, and more.
 * **Analyze Results** - Easily see how individual site visitors respond but also analyze how all site visitors are responding.
 * **Control Timing** - LiteSurveys has many options available for controlling when the survey appears.
 * **Target Specific Pages** - Show your survey on your whole website or only on specific pages.
