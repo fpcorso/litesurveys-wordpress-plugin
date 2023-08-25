@@ -35,7 +35,7 @@ You can use LiteSurveys to:
 Ready to get started? Create your first survey within minutes!
 
 == Installation ==
-1. Log into Wordpress
+1. Log into WordPress
 2. Go to `Plugins`, `Add New`
 3. Search for `LiteSurveys`
 4. Click `Install Now`, then `Activate`
