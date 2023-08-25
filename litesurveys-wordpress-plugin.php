@@ -3,7 +3,7 @@
  * Plugin Name: LiteSurveys Integration
  * Description: Adds your LiteSurveys to your WordPress site
  * Version: 1.0.0
- * Requires at least: 6.1
+ * Requires at least: 5.8
  * Requires PHP: 7.4
  * License: GPL v3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -91,7 +91,7 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 */
 		public static function litesurveys_settings_section_callback() {
 			?>
-			<p>You will need to have an active LiteSurveys account to use this plugin. Within your LiteSurveys account, go to the "Connect Website" page to get your Website ID needed below.</p>
+			<p>You will need to have an active <a href="https://litesurveys.com" target="_blank">LiteSurveys</a> account to use this plugin. Within your LiteSurveys account, go to the "Connect Website" page to get your Website ID needed below.</p>
 			<?php
 		}
 
