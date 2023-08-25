@@ -4,7 +4,7 @@
  * Description: Adds your LiteSurveys to your WordPress site
  * Version: 1.0.0
  * Requires at least: 6.1
- * Requires PHP: 7.2
+ * Requires PHP: 7.4
  * License: GPL v3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Author: LiteSurveys
@@ -91,7 +91,7 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 		 */
 		public static function litesurveys_settings_section_callback() {
 			?>
-			<p>SOME INSTRUCTIONS!</p>
+			<p>You will need to have an active LiteSurveys account to use this plugin. Within your LiteSurveys account, go to the "Connect Website" page to get your Website ID needed below.</p>
 			<?php
 		}
 
@@ -104,7 +104,7 @@ if ( ! class_exists( 'LiteSurveys_Integration' ) ) {
 			$site_id = self::get_site_id();
 			?>
 			<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr( $site_id ); ?>">
-			<p>(Leave blank to disable)</p>
+			<p class="description">(Leave blank to disable)</p>
 			<?php
 		}
 
