@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: LiteSurveys Integration
+ * Plugin Name: LiteSurveys
  * Description: Adds your LiteSurveys to your WordPress site
  * Version: 1.0.0
  * Requires at least: 5.8
