@@ -12,7 +12,7 @@ Learn from your site visitors using quick surveys.
 
 == Description ==
 
-Easily hear from your users by adding pre-sale surveys, post-sale surveys, feedback surveys, and more to your website.
+Easily hear from your users by adding pre-sale surveys, post-sale surveys, feedback surveys, and more to your website by integrating your site with [the LiteSurveys service](https://litesurveys.com/).
 
 **Important Note**: This plugin requires a paid [LiteSurveys](https://litesurveys.com) plan to create surveys and collect responses. Pricing starts at $1/month and every plan comes with a 14-day free trial.
 
@@ -31,8 +31,9 @@ You can use LiteSurveys to:
 * **Analyze Results** - Easily see how individual site visitors respond but also analyze how all site visitors are responding.
 * **Control Timing** - LiteSurveys has many options available for controlling when the survey appears.
 * **Target Specific Pages** - Show your survey on your whole website or only on specific pages.
+* **Export Results** - Export your survey responses so you can use them in spreadsheets, databases, other tools, and more.
 
-Ready to get started? Create your first survey within minutes!
+Ready to get started? [Create your account](https://litesurveys.com/) to create your first survey within minutes!
 
 == Installation ==
 1. Log into WordPress
@@ -48,5 +49,5 @@ Ready to get started? Create your first survey within minutes!
 
 == Changelog ==
 
-= 1.0.0 (August 28, 2023) =
+= 1.0.0 (November 25, 2023) =
 * Initial Release
