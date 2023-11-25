@@ -4,4 +4,4 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     die;
 }
 
-delete_option( 'litesurveys_settings' );
+delete_option( 'LSAPP_litesurveys_settings' );
