@@ -18,6 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// Define plugin version constant.
+define( 'LSAPP_PLUGIN_VERSION', '1.0.0' );
+
 
 /**
  * The plugin's main class
@@ -25,6 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  */
 class LSAPP_LiteSurveys_Integration {
+
+	
 
 	/**
 	 * Initializes our plugin
@@ -46,7 +51,8 @@ class LSAPP_LiteSurveys_Integration {
 			add_action( 'admin_init', array( __CLASS__, 'admin_init' ) );
 		}
 		
-		add_action('wp_footer', array( __CLASS__, 'add_script' ), 50);
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_script' ), 50 );
+		add_filter( 'wp_script_attributes', array( __CLASS__, 'add_script_attributes' ) );
 	}
 
 	/**
@@ -103,7 +109,7 @@ class LSAPP_LiteSurveys_Integration {
 	public static function litesurveys_settings_site_id_callback($args) {
 		$site_id = self::get_site_id();
 		?>
-		<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr( $site_id ); ?>">
+		<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="LSAPP_litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr( $site_id ); ?>">
 		<p class="description">(Leave blank to disable)</p>
 		<?php
 	}
@@ -133,19 +139,25 @@ class LSAPP_LiteSurveys_Integration {
 	}
 
 	/**
-	 * Adds the LiteSurveys script to the website
+	 * Enqueues the LiteSurveys script
 	 *
 	 * @since 1.0.0
 	 */
-	public static function add_script() {
-		$site_id = self::get_site_id();
-		if ( empty( $site_id ) ) {
-			return;
-		}
+	public static function enqueue_script() {
+		wp_enqueue_script( 'litesurveys', 'https://embeds.litesurveys.com/litesurveys.min.js', array(), LSAPP_PLUGIN_VERSION, array( 'strategy' => 'defer' ) );
+	}
 
-		?>
-		<script src="https://embeds.litesurveys.com/litesurveys.min.js" id="litesurveys-js" data-site-id="<?php echo esc_attr($site_id); ?>"></script>
-		<?php
+	/**
+	 * Filter the script attributes to add id and data-site-id attributes.
+	 *
+	 * @param array $attributes The script tag attributes.
+	 * @return array
+	 */
+	public static function add_script_attributes( $attributes ) {
+		if ( 'litesurveys-js' === $attributes['id'] ) {
+			$attributes['data-site-id'] = self::get_site_id();
+		}
+		return $attributes;
 	}
 
 	/**
