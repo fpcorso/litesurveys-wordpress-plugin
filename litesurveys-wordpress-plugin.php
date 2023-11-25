@@ -144,6 +144,9 @@ class LSAPP_LiteSurveys_Integration {
 	 * @since 1.0.0
 	 */
 	public static function enqueue_script() {
+		if ( ! self::get_site_id() ) {
+			return;
+		}
 		wp_enqueue_script( 'litesurveys', 'https://embeds.litesurveys.com/litesurveys.min.js', array(), LSAPP_PLUGIN_VERSION, array( 'strategy' => 'defer' ) );
 	}
 
