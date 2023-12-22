@@ -45,9 +45,10 @@ Ready to get started? [Create your account](https://litesurveys.com/) to create 
 
 == Screenshots ==
 
-1. The settings page.
+1. An example LiteSurveys slidein.
+2. The settings page within the WordPress plugin.
 
 == Changelog ==
 
-= 1.0.0 (November 25, 2023) =
+= 1.0.0 (December 22, 2023) =
 * Initial Release
