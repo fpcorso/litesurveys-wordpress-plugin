@@ -2,7 +2,7 @@
 /**
  * Plugin Name: LiteSurveys
  * Description: Adds your LiteSurveys to your WordPress site
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires at least: 5.8
  * Requires PHP: 8.0
  * License: GPLv3
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin version constant.
-define( 'LSAPP_PLUGIN_VERSION', '1.0.0' );
+define( 'LSAPP_PLUGIN_VERSION', '1.0.1' );
 
 
 /**
@@ -97,7 +97,7 @@ class LSAPP_LiteSurveys_Integration {
 	 */
 	public static function litesurveys_settings_section_callback() {
 		?>
-		<p>You will need to have an active <a href="https://litesurveys.com" target="_blank">LiteSurveys</a> account to use this plugin. Within your LiteSurveys account, go to the "Connect Website" page to get your Website ID needed below.</p>
+		<p>You will need to have an active <a href="https://litesurveys.com" target="_blank">LiteSurveys</a> account to use this plugin. Within your LiteSurveys account, go to the "Connect Website" page to get your Website ID.</p>
 		<?php
 	}
 
