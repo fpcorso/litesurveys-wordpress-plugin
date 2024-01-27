@@ -2,7 +2,7 @@
 /**
  * Plugin Name: LiteSurveys
  * Description: Adds your LiteSurveys to your WordPress site
- * Version: 1.0.1
+ * Version: 1.0.2
  * Requires at least: 5.8
  * Requires PHP: 8.1
  * License: GPLv3
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin version constant.
-define( 'LSAPP_PLUGIN_VERSION', '1.0.1' );
+define( 'LSAPP_PLUGIN_VERSION', '1.0.2' );
 
 
 /**

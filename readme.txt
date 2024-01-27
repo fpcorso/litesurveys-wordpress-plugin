@@ -3,7 +3,7 @@ Contributors: fpcorso
 Tags: surveys, polls, integration
 Requires at least: 5.8
 Tested up to: 6.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 Requires PHP: 8.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -14,7 +14,7 @@ Learn from your site visitors using quick surveys.
 
 Easily hear from your users by adding pre-sale surveys, post-sale surveys, feedback surveys, and more to your website by integrating your site with [the LiteSurveys service](https://litesurveys.com/).
 
-**Important Note**: This plugin requires a paid [LiteSurveys](https://litesurveys.com) plan to create surveys and collect responses. Pricing starts at $1/month and every plan comes with a 14-day free trial.
+**Important Note**: This plugin requires a [LiteSurveys](https://litesurveys.com) plan to create surveys and collect responses. Get started for free today!
 
 ## Collect Feedback and Ideas From Your Site Visitors
 
@@ -33,7 +33,7 @@ You can use LiteSurveys to:
 * **Target Specific Pages** - Show your survey on your whole website or only on specific pages.
 * **Export Results** - Export your survey responses so you can use them in spreadsheets, databases, other tools, and more.
 
-Ready to get started? [Create your account](https://litesurveys.com/) to create your first survey within minutes!
+Ready to get started? [Create your account](https://litesurveys.com/) for free to create your first survey within minutes!
 
 == Installation ==
 1. Log into WordPress
@@ -49,6 +49,10 @@ Ready to get started? [Create your account](https://litesurveys.com/) to create 
 2. The settings page within the WordPress plugin.
 
 == Changelog ==
+
+= 1.0.2 (January 27, 2024) =
+* Bump minimum PHP version to 8.1
+* Add settings link on plugins page for easier discoverability
 
 = 1.0.1 (December 22, 2023) =
 * Minor copy tweaks
