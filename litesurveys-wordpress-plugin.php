@@ -53,6 +53,7 @@ class LSAPP_LiteSurveys_Integration {
 		
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_script' ), 50 );
 		add_filter( 'wp_script_attributes', array( __CLASS__, 'add_script_attributes' ) );
+		add_filter( 'plugin_action_links', array( __CLASS__, 'plugin_action_links' ), 10, 2 );
 	}
 
 	/**
@@ -203,6 +204,25 @@ class LSAPP_LiteSurveys_Integration {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Adds a settings link for the plugin when on the plugins page
+	 *
+	 * @since 1.0.2
+	 */
+	public static function plugin_action_links($actions, $plugin_file) {
+		// Check both the slug when installing from WP plugin repo and
+		// slug when installing directly from GitHub repo.
+		$plugin_files = [
+			'litesurveys/litesurveys-wordpress-plugin.php',
+			'litesurveys-wordpress-plugin/litesurveys-wordpress-plugin.php'
+		];
+		if (in_array($plugin_file, $plugin_files)) {
+			$settings_url = sprintf( '<a href="%s">Settings</a>', esc_url( admin_url( 'options-general.php?page=LSAPP_litesurveys' ) ) );
+			$actions = array_merge( ['litesurveys_settings' => $settings_url], $actions) ;
+		}
+		return $actions;
 	}
 }
 
