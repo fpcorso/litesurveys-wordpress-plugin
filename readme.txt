@@ -1,10 +1,10 @@
 === LiteSurveys ===
 Contributors: fpcorso
-Tags: surveys, polls, integration
-Requires at least: 5.8
-Tested up to: 6.4
+Tags: surveys, polls, integration, marketing
+Requires at least: 6.0
+Tested up to: 6.6.1
 Stable tag: 1.0.2
-Requires PHP: 8.1
+Requires PHP: 8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -45,7 +45,7 @@ Ready to get started? [Create your account](https://litesurveys.com/) for free t
 
 == Screenshots ==
 
-1. An example LiteSurveys slidein.
+1. An example LiteSurveys slide-in survey.
 2. The settings page within the WordPress plugin.
 
 == Changelog ==
