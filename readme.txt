@@ -3,7 +3,7 @@ Contributors: fpcorso
 Tags: surveys, polls, integration, marketing
 Requires at least: 6.0
 Tested up to: 6.6.1
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 Requires PHP: 8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -49,6 +49,9 @@ Ready to get started? [Create your account](https://litesurveys.com/) for free t
 2. The settings page within the WordPress plugin.
 
 == Changelog ==
+
+= 1.0.3 (August 2, 2024) =
+* Minor copy tweaks
 
 = 1.0.2 (January 27, 2024) =
 * Bump minimum PHP version to 8.1
