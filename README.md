@@ -2,7 +2,7 @@
 
 This plugin connects your [LiteSurveys](https://litesurveys.com) account to your WordPress site. It allows you to easily embed surveys into your site and collect responses.
 
-**Important Note**: This plugin requires a paid LiteSurveys plan to create surveys and collect responses. Pricing starts at $1/month and every plan comes with a 14-day free trial.
+**Important Note**: This plugin requires a LiteSurveys plan to create surveys and collect responses. Get started for free today!.
 
 ## Getting Started
 
@@ -22,7 +22,7 @@ When contributing please ensure you follow the guidelines below so that we can k
 * For bug reports, please clearly describe the bug/issue and include steps on how to reproduce it
 * For feature requests, please clearly describe what you would like, how it would be used, and example screenshots (if possible)
 
-**Note:** This is only for issues related to the plugin itself. If you have issues or feature requests with your LiteSurveys account, please [reach out to our team here]().
+**Note:** This is only for issues related to the plugin itself. If you have issues or feature requests with your LiteSurveys account, please [reach out to our team here](https://litesurveys.com/).
 
 ### Pull Requests
 
@@ -52,4 +52,4 @@ This project is licensed under the GPLv3 License.
 
 ## Support
 
-This is a developer's portal for the LiteSurveys WordPress plugin and should _not_ be used for support. If you need help with LiteSurveys, please [reach out to our team here]().
+This is a developer's portal for the LiteSurveys WordPress plugin and should _not_ be used for support. If you need help with LiteSurveys, please [reach out to our team here](https://litesurveys.com/).
