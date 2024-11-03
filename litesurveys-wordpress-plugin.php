@@ -133,6 +133,29 @@ class LSAPP_LiteSurveys {
 		delete_option( 'LSAPP_litesurveys_settings' );
 	}
 
+	public function addAdminMenu() {
+		add_menu_page(
+			'LiteSurveys', 
+			'LiteSurveys', 
+			'manage_options',
+			'LSAPP_litesurveys',
+			array($this, 'renderAdminPage'),
+			'dashicons-chart-bar',
+			30
+		);
+	}
+
+	public function renderAdminPage() {
+		global $wpdb;
+		
+		$surveys = $wpdb->get_results(
+			"SELECT * FROM {$wpdb->prefix}litesurveys_surveys ORDER BY created_at DESC"
+		);
+		
+		include($this->plugin_path . 'views/admin/surveys-admin.php');
+	}
+
+
 	/**
 	 * Adds a settings link for the plugin when on the plugins page
 	 *
