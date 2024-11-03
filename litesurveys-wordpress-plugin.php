@@ -51,6 +51,88 @@ class LSAPP_LiteSurveys {
 	}
 
 	/**
+	 * Runs our DB setup code upon plugin activation.
+	 * 
+	 * @since 2.0.0
+	 */
+	public function activatePlugin() {
+		global $wpdb;
+		$charset_collate = $wpdb->get_charset_collate();
+
+		// Create surveys table
+		$sql_surveys = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}litesurveys_surveys (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			name varchar(100) NOT NULL,
+			active tinyint(1) DEFAULT 0,
+			submit_message text NOT NULL,
+			targeting_settings json DEFAULT NULL,
+			appearance_settings json DEFAULT NULL,
+			created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id)
+		) $charset_collate;";
+
+		// Create questions table
+		$sql_questions = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}litesurveys_questions (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			survey_id bigint(20) NOT NULL,
+			type varchar(25) NOT NULL,
+			content varchar(100) NOT NULL,
+			answers json DEFAULT NULL,
+			created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+			updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			FOREIGN KEY (survey_id) REFERENCES {$wpdb->prefix}litesurveys_surveys(id) ON DELETE CASCADE
+		) $charset_collate;";
+
+		// Create submissions table
+		$sql_submissions = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}litesurveys_submissions (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			survey_id bigint(20) NOT NULL,
+			page varchar(255) DEFAULT NULL,
+			created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			FOREIGN KEY (survey_id) REFERENCES {$wpdb->prefix}litesurveys_surveys(id) ON DELETE CASCADE
+		) $charset_collate;";
+
+		// Create responses table
+		$sql_responses = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}litesurveys_responses (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			submission_id bigint(20) NOT NULL,
+			question_id bigint(20) NOT NULL,
+			content text NOT NULL,
+			created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			FOREIGN KEY (submission_id) REFERENCES {$wpdb->prefix}litesurveys_submissions(id) ON DELETE CASCADE,
+			FOREIGN KEY (question_id) REFERENCES {$wpdb->prefix}litesurveys_questions(id) ON DELETE CASCADE
+		) $charset_collate;";
+
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		dbDelta($sql_surveys);
+		dbDelta($sql_questions);
+		dbDelta($sql_submissions);
+		dbDelta($sql_responses);
+
+		// Set version
+		add_option('lsapp_litesurveys_version', '2.0.0');
+	}
+
+	public static function uninstallPlugin() {
+		global $wpdb;
+		
+		// Drop tables in reverse order of dependencies
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_responses");
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_submissions");
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_questions");
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_surveys");
+		
+		delete_option('lsapp_litesurveys_version');
+
+		// Delete settings from 1.0.0 version if present
+		delete_option( 'LSAPP_litesurveys_settings' );
+	}
+
+	/**
 	 * Sets up our page in the admin menu
 	 *
 	 * @since 1.0.0
