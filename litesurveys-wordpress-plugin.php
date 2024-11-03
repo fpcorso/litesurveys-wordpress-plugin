@@ -40,6 +40,7 @@ class LSAPP_LiteSurveys {
 		add_action('admin_menu', array($this, 'addAdminMenu'));
 		add_action('admin_post_save_survey', array($this, 'handleSaveSurvey'));
 		add_action('admin_notices', array($this, 'displayAdminNotices'));
+		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
 		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
 		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
 		register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
@@ -124,6 +125,27 @@ class LSAPP_LiteSurveys {
 		delete_option('LSAPP_litesurveys_settings');
 	}
 
+	public function enqueueAdminAssets($hook) {
+		// Only load on our plugin pages
+		if (strpos($hook, 'litesurveys') === false) {
+			return;
+		}
+
+		// Get the current admin page action
+		$action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
+
+		// Only load on edit/new survey pages
+		if ($action === 'edit' || $action === 'new') {
+			wp_enqueue_script(
+				'litesurveys-admin-edit',
+				plugin_dir_url(__FILE__) . 'admin/js/survey-edit.js',
+				array('jquery'),
+				LSAPP_PLUGIN_VERSION,
+				true
+			);
+		}
+	}
+
 	public function addAdminMenu() {
 		add_menu_page(
 			'LiteSurveys', 
@@ -197,14 +219,14 @@ class LSAPP_LiteSurveys {
 						]
 					];
 				}
-				include($this->plugin_path . 'templates/admin/survey-edit.php');
+				include($this->plugin_path . 'views/admin/survey-edit.php');
 				break;
 
 			default:
 				$surveys = $wpdb->get_results(
 					"SELECT * FROM {$wpdb->prefix}litesurveys_surveys WHERE deleted_at IS NULL ORDER BY created_at DESC"
 				);
-				include($this->plugin_path . 'templates/admin/surveys-admin.php');
+				include($this->plugin_path . 'views/admin/surveys-admin.php');
 				break;
 		}
 	}
