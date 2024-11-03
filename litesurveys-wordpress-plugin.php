@@ -135,6 +135,13 @@ class LSAPP_LiteSurveys {
 
 		// Only load on edit/new survey pages
 		if ($action === 'edit' || $action === 'new') {
+			wp_enqueue_style(
+				'litesurveys-admin-edit',
+				plugin_dir_url(__FILE__) . 'admin/css/survey-edit.css',
+				array(),
+				LSAPP_PLUGIN_VERSION
+			);
+			
 			wp_enqueue_script(
 				'litesurveys-admin-edit',
 				plugin_dir_url(__FILE__) . 'admin/js/survey-edit.js',

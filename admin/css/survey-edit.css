@@ -1,0 +1,27 @@
+.error-message {
+	color: #d63638;
+	margin-top: 5px;
+	font-size: 12px;
+}
+
+input.error,
+textarea.error {
+	border-color: #d63638 !important;
+}
+
+.answer-choice {
+	margin-bottom: 10px;
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.answer-choice input {
+	flex: 1;
+}
+
+/* WordPress admin compatibility styles */
+#survey-edit-form .form-table input[type="text"].error,
+#survey-edit-form .form-table textarea.error {
+	border-color: #d63638;
+}

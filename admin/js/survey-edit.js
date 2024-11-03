@@ -9,10 +9,57 @@ document.addEventListener('DOMContentLoaded', function() {
 		return;
 	}
 
+	// Helper to create error message element
+	function createErrorMessage(message) {
+		const div = document.createElement('div');
+		div.className = 'error-message';
+		div.style.color = '#d63638';
+		div.style.marginTop = '5px';
+		div.textContent = message;
+		return div;
+	}
+
+	// Helper to add error state to field
+	function addErrorState(element, message) {
+		// Remove any existing error message
+		removeErrorState(element);
+		
+		// Add error class to the input
+		element.classList.add('error');
+		element.style.borderColor = '#d63638';
+		
+		// Add error message after the element
+		const errorMessage = createErrorMessage(message);
+		element.parentNode.appendChild(errorMessage);
+	}
+
+	// Helper to remove error state from field
+	function removeErrorState(element) {
+		// Remove error class and styling
+		element.classList.remove('error');
+		element.style.borderColor = '';
+		
+		// Remove any existing error message
+		const existingError = element.parentNode.querySelector('.error-message');
+		if (existingError) {
+			existingError.remove();
+		}
+	}
+
+	// Clear all error states
+	function clearAllErrors() {
+		document.querySelectorAll('.error').forEach(element => {
+			removeErrorState(element);
+		});
+	}
+
 	// Toggle answer options based on question type
 	function toggleAnswerOptions() {
 		answerOptionsSection.style.display = 
 			questionType.value === 'multiple-choice' ? 'table-row' : 'none';
+			
+		// Clear any error states when switching types
+		clearAllErrors();
 	}
 
 	// Create new answer input
@@ -30,7 +77,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// Add new answer choice
 	function addAnswerChoice() {
-		answerChoices.appendChild(createAnswerInput());
+		const newAnswer = createAnswerInput();
+		answerChoices.appendChild(newAnswer);
+		
+		// Clear any answer-related errors when adding new answers
+		const answersSection = document.querySelector('.answer-options');
+		removeErrorState(answersSection);
 	}
 
 	// Remove answer choice
@@ -39,44 +91,70 @@ document.addEventListener('DOMContentLoaded', function() {
 			const answerCount = answerChoices.querySelectorAll('.answer-choice').length;
 			if (answerCount > 2) {
 				event.target.closest('.answer-choice').remove();
+				
+				// Re-validate answers after removal
+				validateAnswers();
 			} else {
-				alert('Multiple choice questions must have at least 2 answers.');
+				const answersSection = document.querySelector('.answer-options');
+				addErrorState(answersSection, 'Multiple choice questions must have at least 2 answers.');
 			}
 		}
 	}
 
-	// Form validation
-	function validateForm(event) {
-		const surveyName = document.getElementById('survey-name').value.trim();
-		const questionContent = document.getElementById('question-content').value.trim();
-		
-		let isValid = true;
-		let errorMessages = [];
-
-		if (!surveyName) {
-			errorMessages.push('Survey name is required.');
-			isValid = false;
-		}
-
-		if (!questionContent) {
-			errorMessages.push('Question content is required.');
-			isValid = false;
-		}
-
+	// Validate answers section
+	function validateAnswers() {
+		const answersSection = document.querySelector('.answer-options');
 		if (questionType.value === 'multiple-choice') {
 			const answers = Array.from(answerChoices.querySelectorAll('input[type="text"]'))
 								.map(input => input.value.trim())
 								.filter(value => value !== '');
 
 			if (answers.length < 2) {
-				errorMessages.push('Multiple choice questions must have at least 2 answers.');
-				isValid = false;
+				addErrorState(answersSection, 'Multiple choice questions must have at least 2 answers.');
+				return false;
+			} else {
+				removeErrorState(answersSection);
+				return true;
 			}
 		}
+		return true;
+	}
 
-		if (!isValid) {
-			event.preventDefault();
-			alert(errorMessages.join('\n'));
+	// Form validation
+	function validateForm(event) {
+		event.preventDefault();
+		
+		clearAllErrors();
+		
+		const surveyName = document.getElementById('survey-name');
+		const questionContent = document.getElementById('question-content');
+		
+		let isValid = true;
+
+		if (!surveyName.value.trim()) {
+			addErrorState(surveyName, 'Survey name is required.');
+			isValid = false;
+		}
+
+		if (!questionContent.value.trim()) {
+			addErrorState(questionContent, 'Question content is required.');
+			isValid = false;
+		}
+
+		if (!validateAnswers()) {
+			isValid = false;
+		}
+
+		// If everything is valid, submit the form
+		if (isValid) {
+			form.submit();
+		}
+	}
+
+	// Handle input changes to clear errors
+	function handleInputChange(event) {
+		if (event.target.classList.contains('error')) {
+			removeErrorState(event.target);
 		}
 	}
 
@@ -85,6 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	addAnswerBtn.addEventListener('click', addAnswerChoice);
 	answerChoices.addEventListener('click', removeAnswerChoice);
 	form.addEventListener('submit', validateForm);
+	form.addEventListener('input', handleInputChange);
 
 	// Initial setup
 	toggleAnswerOptions();
