@@ -30,6 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			targetElement = element.querySelector('.answer-choices-wrapper');
 		} else {
 			targetElement = element;
+			element.classList.add('error');
+			// For elements without wrappers, add error message after the input
+			const errorMessage = createErrorMessage(message);
+			element.parentNode.insertBefore(errorMessage, element.nextSibling);
+			return;
 		}
 		
 		// Add error class
@@ -50,6 +55,13 @@ document.addEventListener('DOMContentLoaded', function() {
 			targetElement = element.querySelector('.answer-choices-wrapper');
 		} else {
 			targetElement = element;
+			element.classList.remove('error');
+			// For elements without wrappers, find and remove error message
+			const nextSibling = element.nextSibling;
+			if (nextSibling && nextSibling.classList && nextSibling.classList.contains('error-message')) {
+				nextSibling.remove();
+			}
+			return;
 		}
 		
 		// Remove error class
