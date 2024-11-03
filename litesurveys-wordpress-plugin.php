@@ -40,6 +40,7 @@ class LSAPP_LiteSurveys {
 		add_action('admin_menu', array($this, 'addAdminMenu'));
 		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
 		add_action('admin_post_save_survey', array($this, 'handleSaveSurvey'));
+		add_action('admin_notices', array($this, 'displayAdminNotices'));
 		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
 		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
 		register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
@@ -221,76 +222,159 @@ class LSAPP_LiteSurveys {
 		$survey_id = isset($_POST['survey_id']) ? intval($_POST['survey_id']) : 0;
 		$save_type = isset($_POST['save_type']) ? sanitize_text_field($_POST['save_type']) : 'draft';
 		
-		// Prepare survey data
-		$survey_data = array(
-			'name' => sanitize_text_field($_POST['survey_name']),
-			'submit_message' => sanitize_textarea_field($_POST['submit_message']),
-			'active' => $save_type === 'publish',
-			'targeting_settings' => json_encode([
-				'targets' => [
-					'show' => sanitize_text_field($_POST['targeting_show']),
-					'includes' => isset($_POST['includes']) ? array_map('sanitize_text_field', $_POST['includes']) : [],
-					'excludes' => isset($_POST['excludes']) ? array_map('sanitize_text_field', $_POST['excludes']) : []
-				],
-				'trigger' => [[
-					'type' => sanitize_text_field($_POST['trigger_type']),
-					'auto_timing' => intval($_POST['auto_timing'])
-				]]
-			]),
-			'appearance_settings' => json_encode([
-				'horizontal_position' => sanitize_text_field($_POST['horizontal_position'])
-			])
-		);
+		try {
+			// Validate required fields
+			if (empty($_POST['survey_name'])) {
+				throw new Exception(__('Survey name is required.', 'litesurveys'));
+			}
 
-		// Prepare question data
-		$question_data = array(
-			'type' => sanitize_text_field($_POST['question_type']),
-			'content' => sanitize_textarea_field($_POST['question_content']),
-			'answers' => $question_data['type'] === 'multiple-choice' ? 
-						json_encode(array_map('sanitize_text_field', array_filter($_POST['answers']))) : 
-						json_encode([])
-		);
+			if (empty($_POST['question_content'])) {
+				throw new Exception(__('Survey question is required.', 'litesurveys'));
+			}
 
-		if ($survey_id) {
-			// Update existing survey
-			$wpdb->update(
-				$wpdb->prefix . 'litesurveys_surveys',
-				$survey_data,
-				['id' => $survey_id]
+			// Prepare survey data
+			$survey_data = array(
+				'name' => sanitize_text_field($_POST['survey_name']),
+				'submit_message' => sanitize_textarea_field($_POST['submit_message']),
+				'active' => $save_type === 'publish',
+				'targeting_settings' => json_encode([
+					'targets' => [
+						'show' => sanitize_text_field($_POST['targeting_show']),
+						'includes' => isset($_POST['includes']) ? array_map('sanitize_text_field', $_POST['includes']) : [],
+						'excludes' => isset($_POST['excludes']) ? array_map('sanitize_text_field', $_POST['excludes']) : []
+					],
+					'trigger' => [[
+						'type' => sanitize_text_field($_POST['trigger_type']),
+						'auto_timing' => intval($_POST['auto_timing'])
+					]]
+				]),
+				'appearance_settings' => json_encode([
+					'horizontal_position' => sanitize_text_field($_POST['horizontal_position'])
+				])
 			);
 
-			// Update or insert question
-			$existing_question = $wpdb->get_row($wpdb->prepare(
-				"SELECT id FROM {$wpdb->prefix}litesurveys_questions WHERE survey_id = %d AND deleted_at IS NULL",
-				$survey_id
-			));
+			// Prepare question data
+			$question_data = array(
+				'type' => sanitize_text_field($_POST['question_type']),
+				'content' => sanitize_textarea_field($_POST['question_content']),
+				'answers' => $_POST['question_type'] === 'multiple-choice' ? 
+							json_encode(array_map('sanitize_text_field', array_filter($_POST['answers']))) : 
+							json_encode([])
+			);
 
-			if ($existing_question) {
-				$wpdb->update(
-					$wpdb->prefix . 'litesurveys_questions',
-					$question_data,
-					['id' => $existing_question->id]
+			// Start transaction
+			$wpdb->query('START TRANSACTION');
+
+			if ($survey_id) {
+				// Update existing survey
+				$result = $wpdb->update(
+					$wpdb->prefix . 'litesurveys_surveys',
+					$survey_data,
+					['id' => $survey_id]
 				);
-			} else {
-				$question_data['survey_id'] = $survey_id;
-				$wpdb->insert($wpdb->prefix . 'litesurveys_questions', $question_data);
-			}
-		} else {
-			// Insert new survey
-			$wpdb->insert($wpdb->prefix . 'litesurveys_surveys', $survey_data);
-			$survey_id = $wpdb->insert_id;
 
-			// Insert question
-			$question_data['survey_id'] = $survey_id;
-			$wpdb->insert($wpdb->prefix . 'litesurveys_questions', $question_data);
+				if ($result === false) {
+					throw new Exception(__('Failed to update survey.', 'litesurveys'));
+				}
+
+				// Update or insert question
+				$existing_question = $wpdb->get_row($wpdb->prepare(
+					"SELECT id FROM {$wpdb->prefix}litesurveys_questions WHERE survey_id = %d AND deleted_at IS NULL",
+					$survey_id
+				));
+
+				if ($existing_question) {
+					$result = $wpdb->update(
+						$wpdb->prefix . 'litesurveys_questions',
+						$question_data,
+						['id' => $existing_question->id]
+					);
+					if ($result === false) {
+						throw new Exception(__('Failed to update survey question.', 'litesurveys'));
+					}
+				} else {
+					$question_data['survey_id'] = $survey_id;
+					$result = $wpdb->insert($wpdb->prefix . 'litesurveys_questions', $question_data);
+					if (!$result) {
+						throw new Exception(__('Failed to create survey question.', 'litesurveys'));
+					}
+				}
+			} else {
+				// Insert new survey
+				$result = $wpdb->insert($wpdb->prefix . 'litesurveys_surveys', $survey_data);
+				if (!$result) {
+					throw new Exception(__('Failed to create survey.', 'litesurveys'));
+				}
+				$survey_id = $wpdb->insert_id;
+
+				// Insert question
+				$question_data['survey_id'] = $survey_id;
+				$result = $wpdb->insert($wpdb->prefix . 'litesurveys_questions', $question_data);
+				if (!$result) {
+					throw new Exception(__('Failed to create survey question.', 'litesurveys'));
+				}
+			}
+
+			// Commit transaction
+			$wpdb->query('COMMIT');
+
+			// Set success message
+			$message_type = 'success';
+			$message = $save_type === 'publish' ? 
+				__('Survey published successfully.', 'litesurveys') : 
+				__('Survey saved successfully.', 'litesurveys');
+
+		} catch (Exception $e) {
+			// Rollback transaction
+			$wpdb->query('ROLLBACK');
+			
+			// Set error message
+			$message_type = 'error';
+			$message = $e->getMessage();
 		}
 
-		// Redirect back to the survey list with a success message
+		// Redirect with appropriate message
 		wp_redirect(add_query_arg(
-			['page' => 'litesurveys', 'message' => 'survey-saved'],
+			[
+				'page' => 'litesurveys',
+				'action' => $survey_id ? 'edit' : 'list',
+				'id' => $survey_id,
+				'message' => $message_type,
+				'message_text' => urlencode($message)
+			],
 			admin_url('admin.php')
 		));
 		exit;
+	}
+
+	public function displayAdminNotices() {
+		// Only show notices on our plugin pages
+		if (!isset($_GET['page']) || $_GET['page'] !== 'litesurveys') {
+			return;
+		}
+
+		if (isset($_GET['message']) && isset($_GET['message_text'])) {
+			$message_type = sanitize_text_field($_GET['message']);
+			$message_text = sanitize_text_field(urldecode($_GET['message_text']));
+			
+			$class = 'notice notice-';
+			switch ($message_type) {
+				case 'success':
+					$class .= 'success';
+					break;
+				case 'error':
+					$class .= 'error';
+					break;
+				default:
+					$class .= 'info';
+			}
+
+			printf(
+				'<div class="%1$s is-dismissible"><p>%2$s</p></div>',
+				esc_attr($class),
+				esc_html($message_text)
+			);
+		}
 	}
 
 	/**
