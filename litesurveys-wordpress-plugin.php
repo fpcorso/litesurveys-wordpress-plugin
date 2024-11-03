@@ -345,42 +345,47 @@ class LSAPP_LiteSurveys {
 			// Commit transaction
 			$wpdb->query('COMMIT');
 
-			// Set success message
+			// Build the redirect URL properly
+			$redirect_args = array(
+				'page' => 'LSAPP_litesurveys'
+			);
+			
+			// Add action and ID if we're staying on the edit page
+			if ($survey_id) {
+				$redirect_args['action'] = 'edit';
+				$redirect_args['id'] = $survey_id;
+			}
+			
+			// Add the appropriate message
 			if ($save_type === 'publish') {
-				$message = 'survey-published';
+				$redirect_args['message'] = 'survey-published';
 			} elseif ($save_type === 'unpublish') {
-				$message = 'survey-unpublished';
+				$redirect_args['message'] = 'survey-unpublished';
 			} else {
-				$message = 'survey-saved';
+				$redirect_args['message'] = 'survey-saved';
 			}
 
-			// Redirect with success message
-			wp_redirect(add_query_arg(
-				[
-					'page' => 'LSAPP_litesurveys',
-					'action' => $survey_id ? 'edit' : 'list',
-					'id' => $survey_id,
-					'message' => $message
-				],
-				admin_url('admin.php')
-			));
+			// Redirect with properly built URL
+			$redirect_url = add_query_arg($redirect_args, admin_url('admin.php'));
+			wp_safe_redirect($redirect_url);
 			exit;
 
 		} catch (Exception $e) {
 			// Rollback transaction
 			$wpdb->query('ROLLBACK');
+
+			$redirect_args = array(
+				'page' => 'LSAPP_litesurveys',
+				'message' => 'error',
+				'error' => urlencode($e->getMessage())
+			);
 			
-			// Redirect with error message
-			wp_redirect(add_query_arg(
-				[
-					'page' => 'LSAPP_litesurveys',
-					'action' => $survey_id ? 'edit' : 'list',
-					'id' => $survey_id,
-					'message' => 'error',
-					'error' => urlencode($e->getMessage())
-				],
-				admin_url('admin.php')
-			));
+			if ($survey_id) {
+				$redirect_args['action'] = 'edit';
+				$redirect_args['id'] = $survey_id;
+			}
+
+			wp_safe_redirect(add_query_arg($redirect_args, admin_url('admin.php')));
 			exit;
 		}
 	}
