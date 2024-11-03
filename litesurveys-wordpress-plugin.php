@@ -38,7 +38,6 @@ class LSAPP_LiteSurveys {
 		
 		// Initialize hooks
 		add_action('admin_menu', array($this, 'addAdminMenu'));
-		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
 		add_action('admin_post_save_survey', array($this, 'handleSaveSurvey'));
 		add_action('admin_notices', array($this, 'displayAdminNotices'));
 		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
