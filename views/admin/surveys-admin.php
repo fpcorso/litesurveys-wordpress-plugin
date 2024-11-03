@@ -5,7 +5,7 @@ if (!current_user_can('manage_options')) {
 	wp_die(__('You do not have sufficient permissions to access this page.', 'litesurveys'));
 }
 ?>
-<<div class="wrap">
+<div class="wrap">
 	<h1 class="wp-heading-inline">LiteSurveys</h1>
 	<a href="<?php echo esc_url(admin_url('admin.php?page=litesurveys&action=new')); ?>" class="page-title-action">
 		<?php _e('Add New Survey', 'litesurveys'); ?>

@@ -18,14 +18,8 @@
 defined('ABSPATH') or die('Direct access not permitted.');
 
 // Define plugin version constant.
-define( 'LSAPP_PLUGIN_VERSION', '1.0.3' );
+define('LSAPP_PLUGIN_VERSION', '1.0.3');
 
-
-/**
- * The plugin's main class
- *
- * @since 1.0.0
- */
 class LSAPP_LiteSurveys {
 	private static $instance = null;
 	private $plugin_path;
@@ -45,17 +39,13 @@ class LSAPP_LiteSurveys {
 		// Initialize hooks
 		add_action('admin_menu', array($this, 'addAdminMenu'));
 		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
-		add_filter( 'plugin_action_links', array( $this, 'plugin_action_links' ), 10, 2 );
+		add_action('admin_post_save_survey', array($this, 'handleSaveSurvey'));
+		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
 		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
 		register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
-		register_uninstall_hook(__FILE__, array('LiteSurveys', 'uninstallPlugin'));
+		register_uninstall_hook(__FILE__, array('LSAPP_LiteSurveys', 'uninstallPlugin'));
 	}
 
-	/**
-	 * Runs our DB setup code upon plugin activation.
-	 * 
-	 * @since 2.0.0
-	 */
 	public function activatePlugin() {
 		global $wpdb;
 		$charset_collate = $wpdb->get_charset_collate();
@@ -70,6 +60,7 @@ class LSAPP_LiteSurveys {
 			appearance_settings json DEFAULT NULL,
 			created_at timestamp DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			deleted_at timestamp NULL DEFAULT NULL,
 			PRIMARY KEY (id)
 		) $charset_collate;";
 
@@ -82,6 +73,7 @@ class LSAPP_LiteSurveys {
 			answers json DEFAULT NULL,
 			created_at timestamp DEFAULT CURRENT_TIMESTAMP,
 			updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			deleted_at timestamp NULL DEFAULT NULL,
 			PRIMARY KEY (id),
 			FOREIGN KEY (survey_id) REFERENCES {$wpdb->prefix}litesurveys_surveys(id) ON DELETE CASCADE
 		) $charset_collate;";
@@ -92,6 +84,7 @@ class LSAPP_LiteSurveys {
 			survey_id bigint(20) NOT NULL,
 			page varchar(255) DEFAULT NULL,
 			created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+			deleted_at timestamp NULL DEFAULT NULL,
 			PRIMARY KEY (id),
 			FOREIGN KEY (survey_id) REFERENCES {$wpdb->prefix}litesurveys_surveys(id) ON DELETE CASCADE
 		) $charset_collate;";
@@ -103,6 +96,7 @@ class LSAPP_LiteSurveys {
 			question_id bigint(20) NOT NULL,
 			content text NOT NULL,
 			created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+			deleted_at timestamp NULL DEFAULT NULL,
 			PRIMARY KEY (id),
 			FOREIGN KEY (submission_id) REFERENCES {$wpdb->prefix}litesurveys_submissions(id) ON DELETE CASCADE,
 			FOREIGN KEY (question_id) REFERENCES {$wpdb->prefix}litesurveys_questions(id) ON DELETE CASCADE
@@ -114,7 +108,6 @@ class LSAPP_LiteSurveys {
 		dbDelta($sql_submissions);
 		dbDelta($sql_responses);
 
-		// Set version
 		add_option('lsapp_litesurveys_version', '2.0.0');
 	}
 
@@ -128,9 +121,7 @@ class LSAPP_LiteSurveys {
 		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_surveys");
 		
 		delete_option('lsapp_litesurveys_version');
-
-		// Delete settings from 1.0.0 version if present
-		delete_option( 'LSAPP_litesurveys_settings' );
+		delete_option('LSAPP_litesurveys_settings');
 	}
 
 	public function addAdminMenu() {
@@ -147,14 +138,160 @@ class LSAPP_LiteSurveys {
 
 	public function renderAdminPage() {
 		global $wpdb;
+
+		$action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
 		
-		$surveys = $wpdb->get_results(
-			"SELECT * FROM {$wpdb->prefix}litesurveys_surveys ORDER BY created_at DESC"
-		);
-		
-		include($this->plugin_path . 'views/admin/surveys-admin.php');
+		switch ($action) {
+			case 'edit':
+			case 'new':
+				// Get survey data if editing
+				$survey_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+				$survey = null;
+
+				if ($survey_id) {
+					$survey = $wpdb->get_row($wpdb->prepare(
+						"SELECT * FROM {$wpdb->prefix}litesurveys_surveys WHERE id = %d AND deleted_at IS NULL",
+						$survey_id
+					));
+					
+					if ($survey) {
+						$question = $wpdb->get_row($wpdb->prepare(
+							"SELECT * FROM {$wpdb->prefix}litesurveys_questions WHERE survey_id = %d AND deleted_at IS NULL",
+							$survey_id
+						));
+						
+						if ($question) {
+							$survey->question = $question;
+							$survey->question->answers = json_decode($question->answers);
+						}
+						
+						$survey->targeting_settings = json_decode($survey->targeting_settings);
+						$survey->appearance_settings = json_decode($survey->appearance_settings);
+					}
+				}
+
+				// Set defaults for new survey
+				if (!$survey) {
+					$survey = (object)[
+						'name' => '',
+						'active' => false,
+						'submit_message' => 'Thanks! I appreciate you taking the time to respond.',
+						'targeting_settings' => (object)[
+							'targets' => (object)[
+								'show' => 'all',
+								'includes' => [],
+								'excludes' => []
+							],
+							'trigger' => [(object)[
+								'type' => 'auto',
+								'auto_timing' => 5
+							]]
+						],
+						'appearance_settings' => (object)[
+							'horizontal_position' => 'right'
+						],
+						'question' => (object)[
+							'type' => 'multiple-choice',
+							'content' => '',
+							'answers' => ['', '', '']
+						]
+					];
+				}
+				include($this->plugin_path . 'templates/admin/survey-edit.php');
+				break;
+
+			default:
+				$surveys = $wpdb->get_results(
+					"SELECT * FROM {$wpdb->prefix}litesurveys_surveys WHERE deleted_at IS NULL ORDER BY created_at DESC"
+				);
+				include($this->plugin_path . 'templates/admin/surveys-admin.php');
+				break;
+		}
 	}
 
+	public function handleSaveSurvey() {
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have sufficient permissions to access this page.', 'litesurveys'));
+		}
+
+		check_admin_referer('save_survey', 'survey_nonce');
+		
+		global $wpdb;
+		
+		$survey_id = isset($_POST['survey_id']) ? intval($_POST['survey_id']) : 0;
+		$save_type = isset($_POST['save_type']) ? sanitize_text_field($_POST['save_type']) : 'draft';
+		
+		// Prepare survey data
+		$survey_data = array(
+			'name' => sanitize_text_field($_POST['survey_name']),
+			'submit_message' => sanitize_textarea_field($_POST['submit_message']),
+			'active' => $save_type === 'publish',
+			'targeting_settings' => json_encode([
+				'targets' => [
+					'show' => sanitize_text_field($_POST['targeting_show']),
+					'includes' => isset($_POST['includes']) ? array_map('sanitize_text_field', $_POST['includes']) : [],
+					'excludes' => isset($_POST['excludes']) ? array_map('sanitize_text_field', $_POST['excludes']) : []
+				],
+				'trigger' => [[
+					'type' => sanitize_text_field($_POST['trigger_type']),
+					'auto_timing' => intval($_POST['auto_timing'])
+				]]
+			]),
+			'appearance_settings' => json_encode([
+				'horizontal_position' => sanitize_text_field($_POST['horizontal_position'])
+			])
+		);
+
+		// Prepare question data
+		$question_data = array(
+			'type' => sanitize_text_field($_POST['question_type']),
+			'content' => sanitize_textarea_field($_POST['question_content']),
+			'answers' => $question_data['type'] === 'multiple-choice' ? 
+						json_encode(array_map('sanitize_text_field', array_filter($_POST['answers']))) : 
+						json_encode([])
+		);
+
+		if ($survey_id) {
+			// Update existing survey
+			$wpdb->update(
+				$wpdb->prefix . 'litesurveys_surveys',
+				$survey_data,
+				['id' => $survey_id]
+			);
+
+			// Update or insert question
+			$existing_question = $wpdb->get_row($wpdb->prepare(
+				"SELECT id FROM {$wpdb->prefix}litesurveys_questions WHERE survey_id = %d AND deleted_at IS NULL",
+				$survey_id
+			));
+
+			if ($existing_question) {
+				$wpdb->update(
+					$wpdb->prefix . 'litesurveys_questions',
+					$question_data,
+					['id' => $existing_question->id]
+				);
+			} else {
+				$question_data['survey_id'] = $survey_id;
+				$wpdb->insert($wpdb->prefix . 'litesurveys_questions', $question_data);
+			}
+		} else {
+			// Insert new survey
+			$wpdb->insert($wpdb->prefix . 'litesurveys_surveys', $survey_data);
+			$survey_id = $wpdb->insert_id;
+
+			// Insert question
+			$question_data['survey_id'] = $survey_id;
+			$wpdb->insert($wpdb->prefix . 'litesurveys_questions', $question_data);
+		}
+
+		// Redirect back to the survey list with a success message
+		wp_redirect(add_query_arg(
+			['page' => 'litesurveys', 'message' => 'survey-saved'],
+			admin_url('admin.php')
+		));
+		exit;
+	}
 
 	/**
 	 * Adds a settings link for the plugin when on the plugins page
