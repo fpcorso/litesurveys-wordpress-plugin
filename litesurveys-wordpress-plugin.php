@@ -43,7 +43,6 @@ class LSAPP_LiteSurveys {
 		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
 		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
 		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
-		register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
 		register_uninstall_hook(__FILE__, array('LSAPP_LiteSurveys', 'uninstallPlugin'));
 	}
 
