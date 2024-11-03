@@ -43,7 +43,6 @@ class LSAPP_LiteSurveys {
 		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
 		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
 		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
-		register_uninstall_hook(__FILE__, array('LSAPP_LiteSurveys', 'uninstallPlugin'));
 	}
 
 	public function activatePlugin() {
@@ -109,19 +108,6 @@ class LSAPP_LiteSurveys {
 		dbDelta($sql_responses);
 
 		add_option('lsapp_litesurveys_version', '2.0.0');
-	}
-
-	public static function uninstallPlugin() {
-		global $wpdb;
-		
-		// Drop tables in reverse order of dependencies
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_responses");
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_submissions");
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_questions");
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}litesurveys_surveys");
-		
-		delete_option('lsapp_litesurveys_version');
-		delete_option('LSAPP_litesurveys_settings');
 	}
 
 	public function enqueueAdminAssets($hook) {
