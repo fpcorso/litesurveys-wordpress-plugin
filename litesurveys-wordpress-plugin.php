@@ -3,20 +3,19 @@
  * Plugin Name: LiteSurveys
  * Description: Adds your LiteSurveys to your WordPress site
  * Version: 1.0.3
- * Requires at least: 6.0
+ * Requires at least: 6.1
  * Requires PHP: 8.0
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Author: LiteSurveys
  * Author URI: https://litesurveys.com
+ * Text Domain: litesurveys
  *
  * @author LiteSurveys
  */
 
 // Exits if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined('ABSPATH') or die('Direct access not permitted.');
 
 // Define plugin version constant.
 define( 'LSAPP_PLUGIN_VERSION', '1.0.3' );
@@ -27,59 +26,28 @@ define( 'LSAPP_PLUGIN_VERSION', '1.0.3' );
  *
  * @since 1.0.0
  */
-class LSAPP_LiteSurveys_Integration {
+class LSAPP_LiteSurveys {
+	private static $instance = null;
+	private $plugin_path;
+	private $plugin_url;
 
-	
-
-	/**
-	 * Initializes our plugin
-	 *
-	 * @since 1.0.0
-	 */
-	public static function init() {
-		self::load_hooks();
-	}
-
-	/**
-	 * Adds in any plugin-wide hooks
-	 *
-	 * @since 1.0.0
-	 */
-	public static function load_hooks() {
-		if (is_admin()) {
-			add_action( 'admin_menu', array( __CLASS__, 'setup_admin_menu' ) );
-			add_action( 'admin_init', array( __CLASS__, 'admin_init' ) );
+	public static function getInstance() {
+		if (self::$instance == null) {
+			self::$instance = new self();
 		}
-		
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_script' ), 50 );
-		add_filter( 'wp_script_attributes', array( __CLASS__, 'add_script_attributes' ) );
-		add_filter( 'plugin_action_links', array( __CLASS__, 'plugin_action_links' ), 10, 2 );
+		return self::$instance;
 	}
 
-	/**
-	 * Code to be run during admin_init
-	 *
-	 * @since 1.0.0
-	 */
-	public static function admin_init() {
-		register_setting( 'LSAPP_litesurveys', 'LSAPP_litesurveys_settings' );
-		add_settings_section(
-			'LSAPP_litesurveys_settings_section',
-			'',
-			array( __CLASS__, 'litesurveys_settings_section_callback' ),
-			'LSAPP_litesurveys'
-		);
-		add_settings_field(
-			'LSAPP_litesurveys_settings_site_id',
-			'Site ID',
-			array( __CLASS__, 'litesurveys_settings_site_id_callback' ),
-			'LSAPP_litesurveys',
-			'LSAPP_litesurveys_settings_section',
-			array(
-				'label_for'         => 'site_id',
-				'class'             => 'wporg_row',
-			)
-		);
+	private function __construct() {
+		$this->plugin_path = plugin_dir_path(__FILE__);
+		$this->plugin_url = plugin_dir_url(__FILE__);
+		
+		// Initialize hooks
+		add_action('admin_menu', array($this, 'addAdminMenu'));
+		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
+		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
+		register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
+		register_uninstall_hook(__FILE__, array('LiteSurveys', 'uninstallPlugin'));
 	}
 
 	/**
@@ -89,79 +57,6 @@ class LSAPP_LiteSurveys_Integration {
 	 */
 	public static function setup_admin_menu() {
 		add_options_page( 'LiteSurveys', 'LiteSurveys', 'manage_options', 'LSAPP_litesurveys', array( __CLASS__, 'generate_admin_page' ) );
-	}
-
-	/**
-	 * Callback for our main settings section
-	 *
-	 * @since 1.0.0
-	 */
-	public static function litesurveys_settings_section_callback() {
-		?>
-		<p>You will need to have an active <a href="https://litesurveys.com" target="_blank">LiteSurveys</a> account to use this plugin. Within your LiteSurveys account, go to the "Connect Website" page to get your Website ID.</p>
-		<?php
-	}
-
-	/**
-	 * Callback for site ID settings field
-	 *
-	 * @since 1.0.0
-	 */
-	public static function litesurveys_settings_site_id_callback($args) {
-		$site_id = self::get_site_id();
-		?>
-		<input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="LSAPP_litesurveys_settings[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo esc_attr( $site_id ); ?>">
-		<p class="description">(Leave blank to disable)</p>
-		<?php
-	}
-
-	/**
-	 * Generates our admin page
-	 *
-	 * @since 1.0.0
-	 */
-	public static function generate_admin_page() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		?>
-		<div class="wrap">
-			<h1>LiteSurveys Integration</h1>
-			<form action="options.php" method="post">
-				<?php
-				settings_fields( 'LSAPP_litesurveys' );
-				do_settings_sections( 'LSAPP_litesurveys' );
-				submit_button( 'Save Settings' );
-				?>
-			</form>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Enqueues the LiteSurveys script
-	 *
-	 * @since 1.0.0
-	 */
-	public static function enqueue_script() {
-		if ( ! self::get_site_id() ) {
-			return;
-		}
-		wp_enqueue_script( 'litesurveys', 'https://embeds.litesurveys.com/litesurveys.min.js', array(), LSAPP_PLUGIN_VERSION, array( 'strategy' => 'defer' ) );
-	}
-
-	/**
-	 * Filter the script attributes to add id and data-site-id attributes.
-	 *
-	 * @param array $attributes The script tag attributes.
-	 * @return array
-	 */
-	public static function add_script_attributes( $attributes ) {
-		if ( 'litesurveys-js' === $attributes['id'] ) {
-			$attributes['data-site-id'] = self::get_site_id();
-		}
-		return $attributes;
 	}
 
 	/**
@@ -226,5 +121,6 @@ class LSAPP_LiteSurveys_Integration {
 	}
 }
 
-LSAPP_LiteSurveys_Integration::init();
+// Initialize plugin
+LSAPP_LiteSurveys::getInstance();
 ?>
