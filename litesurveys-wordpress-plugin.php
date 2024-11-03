@@ -45,6 +45,7 @@ class LSAPP_LiteSurveys {
 		// Initialize hooks
 		add_action('admin_menu', array($this, 'addAdminMenu'));
 		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
+		add_filter( 'plugin_action_links', array( $this, 'plugin_action_links' ), 10, 2 );
 		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
 		register_deactivation_hook(__FILE__, array($this, 'deactivatePlugin'));
 		register_uninstall_hook(__FILE__, array('LiteSurveys', 'uninstallPlugin'));
@@ -130,57 +131,6 @@ class LSAPP_LiteSurveys {
 
 		// Delete settings from 1.0.0 version if present
 		delete_option( 'LSAPP_litesurveys_settings' );
-	}
-
-	/**
-	 * Sets up our page in the admin menu
-	 *
-	 * @since 1.0.0
-	 */
-	public static function setup_admin_menu() {
-		add_options_page( 'LiteSurveys', 'LiteSurveys', 'manage_options', 'LSAPP_litesurveys', array( __CLASS__, 'generate_admin_page' ) );
-	}
-
-	/**
-	 * Retrieves the saved site id setting
-	 *
-	 * @since 1.0.0
-	 * @return string
-	 */
-	private static function get_site_id() {
-		return self::get_setting('site_id', '');
-	}
-
-	/**
-	 * Retrieves a specific plugin setting
-	 *
-	 * @since 1.0.0
-	 * @param string $setting Which setting to retrieve.
-	 * @param mixed  $default The value to return if setting does not exist.
-	 * @return mixed
-	 */
-	private static function get_setting($setting, $default = false) {
-		$settings = self::get_settings();
-		if ( isset( $settings[$setting] ) ) {
-			return $settings[$setting];
-		}
-
-		return $default;
-	}
-
-	/**
-	 * Retrieves our plugin settings
-	 *
-	 * @since 1.0.0
-	 * @return array Our settings
-	 */
-	private static function get_settings() {
-		$settings = get_option( 'LSAPP_litesurveys_settings', [] );
-		if (! is_array( $settings ) ) {
-			$settings = [];
-		}
-
-		return $settings;
 	}
 
 	/**
