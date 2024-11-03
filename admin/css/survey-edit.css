@@ -5,8 +5,26 @@
 }
 
 input.error,
-textarea.error {
+textarea.error,
+.question-content-wrapper.error textarea,
+.answer-choices-wrapper.error {
 	border-color: #d63638 !important;
+}
+
+.question-content-wrapper,
+.answer-choices-wrapper {
+	position: relative;
+}
+
+.answer-choices-wrapper {
+	padding: 15px;
+	border: 1px solid #ccd0d4;
+	background: #fff;
+	border-radius: 4px;
+}
+
+.answer-choices-wrapper.error {
+	background-color: #fff5f5;
 }
 
 .answer-choice {
@@ -14,6 +32,10 @@ textarea.error {
 	display: flex;
 	gap: 10px;
 	align-items: center;
+}
+
+.answer-choice:last-child {
+	margin-bottom: 15px;
 }
 
 .answer-choice input {
@@ -24,4 +46,8 @@ textarea.error {
 #survey-edit-form .form-table input[type="text"].error,
 #survey-edit-form .form-table textarea.error {
 	border-color: #d63638;
+}
+
+.add-answer {
+	margin-top: 5px;
 }

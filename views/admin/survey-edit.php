@@ -74,26 +74,32 @@ if (!current_user_can('manage_options')) {
 										<label for="question-content">Question</label>
 									</th>
 									<td>
-										<textarea name="question_content" id="question-content" 
-												  class="large-text" rows="3"><?php 
-											echo esc_textarea($survey->question->content); 
-										?></textarea>
+										<div class="question-content-wrapper">
+											<textarea name="question_content" id="question-content" 
+													class="large-text" rows="3"><?php 
+												echo esc_textarea($survey->question->content); 
+											?></textarea>
+										</div>
 									</td>
 								</tr>
+
+								<!-- Answer Options Section -->
 								<tr class="answer-options" style="<?php echo $survey->question->type === 'open-answer' ? 'display:none' : ''; ?>">
 									<th scope="row">Answer Choices</th>
 									<td>
-										<div id="answer-choices">
-											<?php foreach ($survey->question->answers as $index => $answer) : ?>
-												<div class="answer-choice">
-													<input type="text" name="answers[]" 
-														   value="<?php echo esc_attr($answer); ?>" 
-														   class="regular-text">
-													<button type="button" class="button remove-answer">Remove</button>
-												</div>
-											<?php endforeach; ?>
+										<div class="answer-choices-wrapper">
+											<div id="answer-choices">
+												<?php foreach ($survey->question->answers as $index => $answer) : ?>
+													<div class="answer-choice">
+														<input type="text" name="answers[]" 
+															value="<?php echo esc_attr($answer); ?>" 
+															class="regular-text">
+														<button type="button" class="button remove-answer">Remove</button>
+													</div>
+												<?php endforeach; ?>
+											</div>
+											<button type="button" class="button add-answer">Add Answer</button>
 										</div>
-										<button type="button" class="button add-answer">Add Answer</button>
 									</td>
 								</tr>
 							</table>

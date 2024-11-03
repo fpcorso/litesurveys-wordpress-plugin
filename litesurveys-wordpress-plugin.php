@@ -141,7 +141,7 @@ class LSAPP_LiteSurveys {
 				array(),
 				LSAPP_PLUGIN_VERSION
 			);
-			
+
 			wp_enqueue_script(
 				'litesurveys-admin-edit',
 				plugin_dir_url(__FILE__) . 'admin/js/survey-edit.js',
@@ -363,7 +363,7 @@ class LSAPP_LiteSurveys {
 		// Redirect with appropriate message
 		wp_redirect(add_query_arg(
 			[
-				'page' => 'litesurveys',
+				'page' => 'LSAPP_litesurveys',
 				'action' => $survey_id ? 'edit' : 'list',
 				'id' => $survey_id,
 				'message' => $message_type,

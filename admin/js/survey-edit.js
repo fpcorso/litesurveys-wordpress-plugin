@@ -9,38 +9,54 @@ document.addEventListener('DOMContentLoaded', function() {
 		return;
 	}
 
-	// Helper to create error message element
+	// Helper to create error message
 	function createErrorMessage(message) {
 		const div = document.createElement('div');
 		div.className = 'error-message';
-		div.style.color = '#d63638';
-		div.style.marginTop = '5px';
 		div.textContent = message;
 		return div;
 	}
 
 	// Helper to add error state to field
 	function addErrorState(element, message) {
-		// Remove any existing error message
+		// Remove any existing error state
 		removeErrorState(element);
 		
-		// Add error class to the input
-		element.classList.add('error');
-		element.style.borderColor = '#d63638';
+		// Find the appropriate wrapper or use the element itself
+		let targetElement;
+		if (element.id === 'question-content') {
+			targetElement = element.closest('.question-content-wrapper');
+		} else if (element.classList.contains('answer-options')) {
+			targetElement = element.querySelector('.answer-choices-wrapper');
+		} else {
+			targetElement = element;
+		}
 		
-		// Add error message after the element
+		// Add error class
+		targetElement.classList.add('error');
+		
+		// Add error message after the wrapper
 		const errorMessage = createErrorMessage(message);
-		element.parentNode.appendChild(errorMessage);
+		targetElement.appendChild(errorMessage);
 	}
 
 	// Helper to remove error state from field
 	function removeErrorState(element) {
-		// Remove error class and styling
-		element.classList.remove('error');
-		element.style.borderColor = '';
+		// Find the appropriate wrapper or use the element itself
+		let targetElement;
+		if (element.id === 'question-content') {
+			targetElement = element.closest('.question-content-wrapper');
+		} else if (element.classList.contains('answer-options')) {
+			targetElement = element.querySelector('.answer-choices-wrapper');
+		} else {
+			targetElement = element;
+		}
+		
+		// Remove error class
+		targetElement.classList.remove('error');
 		
 		// Remove any existing error message
-		const existingError = element.parentNode.querySelector('.error-message');
+		const existingError = targetElement.querySelector('.error-message');
 		if (existingError) {
 			existingError.remove();
 		}
@@ -48,8 +64,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// Clear all error states
 	function clearAllErrors() {
+		document.querySelectorAll('.error-message').forEach(msg => msg.remove());
 		document.querySelectorAll('.error').forEach(element => {
-			removeErrorState(element);
+			element.classList.remove('error');
 		});
 	}
 
@@ -81,8 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		answerChoices.appendChild(newAnswer);
 		
 		// Clear any answer-related errors when adding new answers
-		const answersSection = document.querySelector('.answer-options');
-		removeErrorState(answersSection);
+		removeErrorState(answerOptionsSection);
 	}
 
 	// Remove answer choice
@@ -95,25 +111,23 @@ document.addEventListener('DOMContentLoaded', function() {
 				// Re-validate answers after removal
 				validateAnswers();
 			} else {
-				const answersSection = document.querySelector('.answer-options');
-				addErrorState(answersSection, 'Multiple choice questions must have at least 2 answers.');
+				addErrorState(answerOptionsSection, 'Multiple choice questions must have at least 2 answers.');
 			}
 		}
 	}
 
 	// Validate answers section
 	function validateAnswers() {
-		const answersSection = document.querySelector('.answer-options');
 		if (questionType.value === 'multiple-choice') {
 			const answers = Array.from(answerChoices.querySelectorAll('input[type="text"]'))
 								.map(input => input.value.trim())
 								.filter(value => value !== '');
 
 			if (answers.length < 2) {
-				addErrorState(answersSection, 'Multiple choice questions must have at least 2 answers.');
+				addErrorState(answerOptionsSection, 'Multiple choice questions must have at least 2 answers.');
 				return false;
 			} else {
-				removeErrorState(answersSection);
+				removeErrorState(answerOptionsSection);
 				return true;
 			}
 		}
@@ -153,8 +167,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// Handle input changes to clear errors
 	function handleInputChange(event) {
-		if (event.target.classList.contains('error')) {
-			removeErrorState(event.target);
+		const element = event.target.classList.contains('error') ? 
+			event.target : 
+			event.target.closest('.error');
+			
+		if (element) {
+			removeErrorState(element);
 		}
 	}
 
