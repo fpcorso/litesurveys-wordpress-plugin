@@ -346,32 +346,43 @@ class LSAPP_LiteSurveys {
 			$wpdb->query('COMMIT');
 
 			// Set success message
-			$message_type = 'success';
-			$message = $save_type === 'publish' ? 
-				__('Survey published successfully.', 'litesurveys') : 
-				__('Survey saved successfully.', 'litesurveys');
+			if ($save_type === 'publish') {
+				$message = 'survey-published';
+			} elseif ($save_type === 'unpublish') {
+				$message = 'survey-unpublished';
+			} else {
+				$message = 'survey-saved';
+			}
+
+			// Redirect with success message
+			wp_redirect(add_query_arg(
+				[
+					'page' => 'LSAPP_litesurveys',
+					'action' => $survey_id ? 'edit' : 'list',
+					'id' => $survey_id,
+					'message' => $message
+				],
+				admin_url('admin.php')
+			));
+			exit;
 
 		} catch (Exception $e) {
 			// Rollback transaction
 			$wpdb->query('ROLLBACK');
 			
-			// Set error message
-			$message_type = 'error';
-			$message = $e->getMessage();
+			// Redirect with error message
+			wp_redirect(add_query_arg(
+				[
+					'page' => 'LSAPP_litesurveys',
+					'action' => $survey_id ? 'edit' : 'list',
+					'id' => $survey_id,
+					'message' => 'error',
+					'error' => urlencode($e->getMessage())
+				],
+				admin_url('admin.php')
+			));
+			exit;
 		}
-
-		// Redirect with appropriate message
-		wp_redirect(add_query_arg(
-			[
-				'page' => 'LSAPP_litesurveys',
-				'action' => $survey_id ? 'edit' : 'list',
-				'id' => $survey_id,
-				'message' => $message_type,
-				'message_text' => urlencode($message)
-			],
-			admin_url('admin.php')
-		));
-		exit;
 	}
 
 	public function displayAdminNotices() {
@@ -379,28 +390,40 @@ class LSAPP_LiteSurveys {
 		if (!isset($_GET['page']) || $_GET['page'] !== 'litesurveys') {
 			return;
 		}
-
-		if (isset($_GET['message']) && isset($_GET['message_text'])) {
+	
+		if (isset($_GET['message'])) {
 			$message_type = sanitize_text_field($_GET['message']);
-			$message_text = sanitize_text_field(urldecode($_GET['message_text']));
-			
-			$class = 'notice notice-';
+			$class = 'notice ';
+			$message = '';
+	
 			switch ($message_type) {
-				case 'success':
-					$class .= 'success';
+				case 'survey-published':
+					$class .= 'notice-success';
+					$message = __('Survey published successfully.', 'litesurveys');
+					break;
+				case 'survey-unpublished':
+					$class .= 'notice-warning';
+					$message = __('Survey unpublished.', 'litesurveys');
+					break;
+				case 'survey-saved':
+					$class .= 'notice-success';
+					$message = __('Survey saved successfully.', 'litesurveys');
 					break;
 				case 'error':
-					$class .= 'error';
+					$class .= 'notice-error';
+					$message = isset($_GET['error']) ? 
+						urldecode($_GET['error']) : 
+						__('An error occurred while saving the survey.', 'litesurveys');
 					break;
-				default:
-					$class .= 'info';
 			}
-
-			printf(
-				'<div class="%1$s is-dismissible"><p>%2$s</p></div>',
-				esc_attr($class),
-				esc_html($message_text)
-			);
+	
+			if ($message) {
+				printf(
+					'<div class="%1$s is-dismissible"><p>%2$s</p></div>',
+					esc_attr($class),
+					esc_html($message)
+				);
+			}
 		}
 	}
 
