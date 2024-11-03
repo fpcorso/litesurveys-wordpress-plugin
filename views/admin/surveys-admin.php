@@ -7,7 +7,7 @@ if (!current_user_can('manage_options')) {
 ?>
 <div class="wrap">
 	<h1 class="wp-heading-inline">LiteSurveys</h1>
-	<a href="<?php echo esc_url(admin_url('admin.php?page=litesurveys&action=new')); ?>" class="page-title-action">
+	<a href="<?php echo esc_url(admin_url('admin.php?page=LSAPP_litesurveys&action=new')); ?>" class="page-title-action">
 		<?php _e('Add New Survey', 'litesurveys'); ?>
 	</a>
 	
@@ -27,7 +27,7 @@ if (!current_user_can('manage_options')) {
 				<tr>
 					<td colspan="4">
 						<?php _e('No surveys found.', 'litesurveys'); ?> 
-						<a href="<?php echo esc_url(admin_url('admin.php?page=litesurveys&action=new')); ?>">
+						<a href="<?php echo esc_url(admin_url('admin.php?page=LSAPP_litesurveys&action=new')); ?>">
 							<?php _e('Create your first survey', 'litesurveys'); ?>
 						</a>.
 					</td>
@@ -37,23 +37,23 @@ if (!current_user_can('manage_options')) {
 					<tr>
 						<td>
 							<strong>
-								<a href="<?php echo esc_url(admin_url('admin.php?page=litesurveys&action=edit&id=' . $survey->id)); ?>">
+								<a href="<?php echo esc_url(admin_url('admin.php?page=LSAPP_litesurveys&action=edit&id=' . $survey->id)); ?>">
 									<?php echo esc_html($survey->name); ?>
 								</a>
 							</strong>
 							<div class="row-actions">
 								<span class="edit">
-									<a href="<?php echo esc_url(admin_url('admin.php?page=litesurveys&action=edit&id=' . $survey->id)); ?>">
+									<a href="<?php echo esc_url(admin_url('admin.php?page=LSAPP_litesurveys&action=edit&id=' . $survey->id)); ?>">
 										<?php _e('Edit', 'litesurveys'); ?>
 									</a> | 
 								</span>
 								<span class="view">
-									<a href="<?php echo esc_url(admin_url('admin.php?page=litesurveys&action=view-responses&id=' . $survey->id)); ?>">
+									<a href="<?php echo esc_url(admin_url('admin.php?page=LSAPP_litesurveys&action=view-responses&id=' . $survey->id)); ?>">
 										<?php _e('View Responses', 'litesurveys'); ?>
 									</a> | 
 								</span>
 								<span class="trash">
-									<a href="<?php echo wp_nonce_url(admin_url('admin.php?page=litesurveys&action=delete&id=' . $survey->id), 'delete-survey_' . $survey->id); ?>" 
+									<a href="<?php echo wp_nonce_url(admin_url('admin.php?page=LSAPP_litesurveys&action=delete&id=' . $survey->id), 'delete-survey_' . $survey->id); ?>" 
 									   class="submitdelete">
 										<?php _e('Delete', 'litesurveys'); ?>
 									</a>
