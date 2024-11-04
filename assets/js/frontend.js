@@ -1,3 +1,4 @@
+// assets/js/frontend.js
 const liteSurveys = {
 	surveys: [],
 	templates: {
@@ -18,9 +19,11 @@ const liteSurveys = {
 		openAnswer: `<textarea class="litesurveys-slidein-content-textarea"></textarea>`,
 		submitButton: `<button class="litesurveys-slidein-content-button">Submit</button>`
 	},
+
 	init() {
 		this.loadSurveys();
 	},
+
 	loadSurveys() {
 		fetch(liteSurveysSettings.ajaxUrl + 'surveys')
 			.then(response => response.json())
@@ -32,6 +35,7 @@ const liteSurveys = {
 				this.prepareSurvey();
 			});
 	},
+
 	prepareSurvey() {
 		this.addModalMarkup();
 		this.addSlideinListeners();
@@ -81,4 +85,112 @@ const liteSurveys = {
 
 		document.body.appendChild(modal);
 	},
+
+	setPosition() {
+		const horizontalPosition = this.surveys[0].appearance_settings?.horizontal_position || 'right';
+		if (horizontalPosition === 'left') {
+			document.documentElement.style.setProperty('--litesurveys-slidein-left-spacing', '1em');
+		} else {
+			document.documentElement.style.setProperty('--litesurveys-slidein-right-spacing', '1em');
+		}
+	},
+
+	addSlideinListeners() {
+		const modal = document.querySelector('.litesurveys-slidein');
+
+		// Close button
+		modal.querySelector('.litesurveys-slidein-close').addEventListener('click', () => {
+			this.closeModal();
+		});
+
+		// Multiple choice answers
+		modal.querySelectorAll('.litesurveys-answer-button').forEach(button => {
+			button.addEventListener('click', (e) => {
+				this.submitSurvey(e.target.textContent);
+			});
+		});
+
+		// Open answer submit
+		const submitButton = modal.querySelector('.litesurveys-slidein-content-button');
+		if (submitButton) {
+			submitButton.addEventListener('click', () => {
+				const answer = modal.querySelector('.litesurveys-slidein-content-textarea').value;
+				if (answer.trim()) {
+					this.submitSurvey(answer.trim());
+				}
+			});
+		}
+
+		// Escape key handler
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+				this.closeModal();
+			}
+		});
+	},
+
+	openModal() {
+		const cookieName = `litesurveys-slideinclosed-${this.surveys[0].id}`;
+		if (!this.getCookie(cookieName)) {
+			document.querySelector('.litesurveys-slidein').classList.add('litesurveys-is-active');
+			document.querySelector('.litesurveys-slidein').focus();
+		}
+	},
+
+	closeModal() {
+		document.querySelector('.litesurveys-slidein').classList.remove('litesurveys-is-active');
+		this.setCookie(`litesurveys-slideinclosed-${this.surveys[0].id}`, 'yes', 365);
+	},
+
+	submitSurvey(answer) {
+		const survey = this.surveys[0];
+		const submission = {
+			responses: [{
+				question_id: survey.questions[0].id,
+				content: answer
+			}],
+			page: window.location.href
+		};
+
+		fetch(liteSurveysSettings.ajaxUrl + `surveys/${survey.id}/submissions`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(submission)
+		}).then(() => {
+			// Replace content with thank you message
+			const content = document.querySelector('.litesurveys-slidein-content');
+			const form = content.querySelector('.litesurveys-slidein-content-form');
+			form.innerHTML = survey.submit_message;
+
+			// Set cookie to prevent showing again
+			this.setCookie(`litesurveys-slideinclosed-${survey.id}`, 'yes', 365);
+
+			// Close after delay
+			setTimeout(() => this.closeModal(), 3000);
+		});
+	},
+
+	hasValidSurveys(surveys) {
+		return Array.isArray(surveys) && surveys.length > 0 && surveys[0]?.id;
+	},
+
+	setCookie(name, value, days) {
+		const date = new Date();
+		date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+		document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/;samesite=lax`;
+	},
+
+	getCookie(name) {
+		const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+		return match ? match[2] : null;
+	}
 };
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', () => liteSurveys.init());
+} else {
+	liteSurveys.init();
+}
