@@ -4,8 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
 	const answerOptionsSection = document.querySelector('.answer-options');
 	const answerChoices = document.getElementById('answer-choices');
 	const addAnswerBtn = document.querySelector('.add-answer');
+	const saveTypeInput = document.getElementById('save_type');
+	const submitButtons = document.querySelectorAll('.submitbox button[type="submit"]');
 
-	if (!form || !questionType || !answerOptionsSection || !answerChoices || !addAnswerBtn) {
+	if (!form || !questionType || !answerOptionsSection || !answerChoices || !addAnswerBtn || !saveTypeInput) {
 		return;
 	}
 
@@ -74,14 +76,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 	}
 
-	// Clear all error states
-	function clearAllErrors() {
-		document.querySelectorAll('.error-message').forEach(msg => msg.remove());
-		document.querySelectorAll('.error').forEach(element => {
-			element.classList.remove('error');
-		});
-	}
-
 	// Toggle answer options based on question type
 	function toggleAnswerOptions() {
 		answerOptionsSection.style.display = 
@@ -89,6 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
 			
 		// Clear any error states when switching types
 		clearAllErrors();
+	}
+
+	// Clear all error states
+	function clearAllErrors() {
+		document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+		document.querySelectorAll('.error').forEach(element => {
+			element.classList.remove('error');
+		});
 	}
 
 	// Create new answer input
@@ -149,6 +151,18 @@ document.addEventListener('DOMContentLoaded', function() {
 	// Form validation
 	function validateForm(event) {
 		event.preventDefault();
+		
+		// Set the save type based on which button was clicked
+		const clickedButton = event.submitter;
+		if (clickedButton) {
+			if (clickedButton.classList.contains('button-warning')) {
+				saveTypeInput.value = 'unpublish';
+			} else if (clickedButton.classList.contains('button-primary')) {
+				saveTypeInput.value = 'publish';
+			} else {
+				saveTypeInput.value = 'draft';
+			}
+		}
 		
 		clearAllErrors();
 		
