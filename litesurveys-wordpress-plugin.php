@@ -228,7 +228,7 @@ class LSAPP_LiteSurveys {
 		if (!current_user_can('manage_options')) {
 			wp_die(__('You do not have sufficient permissions to access this page.', 'litesurveys'));
 		}
-
+	
 		check_admin_referer('save_survey', 'survey_nonce');
 		
 		global $wpdb;
@@ -241,16 +241,16 @@ class LSAPP_LiteSurveys {
 			if (empty($_POST['survey_name'])) {
 				throw new Exception(__('Survey name is required.', 'litesurveys'));
 			}
-
+	
 			if (empty($_POST['question_content'])) {
 				throw new Exception(__('Survey question is required.', 'litesurveys'));
 			}
-
+	
 			// Prepare survey data
 			$survey_data = array(
 				'name' => sanitize_text_field($_POST['survey_name']),
 				'submit_message' => sanitize_textarea_field($_POST['submit_message']),
-				'active' => $save_type === 'publish',
+				'active' => ($save_type === 'publish'),
 				'targeting_settings' => json_encode([
 					'targets' => [
 						'show' => sanitize_text_field($_POST['targeting_show']),
@@ -266,7 +266,7 @@ class LSAPP_LiteSurveys {
 					'horizontal_position' => sanitize_text_field($_POST['horizontal_position'])
 				])
 			);
-
+	
 			// Prepare question data
 			$question_data = array(
 				'type' => sanitize_text_field($_POST['question_type']),
@@ -275,10 +275,10 @@ class LSAPP_LiteSurveys {
 							json_encode(array_map('sanitize_text_field', array_filter($_POST['answers']))) : 
 							json_encode([])
 			);
-
+	
 			// Start transaction
 			$wpdb->query('START TRANSACTION');
-
+	
 			if ($survey_id) {
 				// Update existing survey
 				$result = $wpdb->update(
@@ -286,17 +286,17 @@ class LSAPP_LiteSurveys {
 					$survey_data,
 					['id' => $survey_id]
 				);
-
+	
 				if ($result === false) {
 					throw new Exception(__('Failed to update survey.', 'litesurveys'));
 				}
-
+	
 				// Update or insert question
 				$existing_question = $wpdb->get_row($wpdb->prepare(
 					"SELECT id FROM {$wpdb->prefix}litesurveys_questions WHERE survey_id = %d AND deleted_at IS NULL",
 					$survey_id
 				));
-
+	
 				if ($existing_question) {
 					$result = $wpdb->update(
 						$wpdb->prefix . 'litesurveys_questions',
@@ -320,7 +320,7 @@ class LSAPP_LiteSurveys {
 					throw new Exception(__('Failed to create survey.', 'litesurveys'));
 				}
 				$survey_id = $wpdb->insert_id;
-
+	
 				// Insert question
 				$question_data['survey_id'] = $survey_id;
 				$result = $wpdb->insert($wpdb->prefix . 'litesurveys_questions', $question_data);
@@ -328,51 +328,36 @@ class LSAPP_LiteSurveys {
 					throw new Exception(__('Failed to create survey question.', 'litesurveys'));
 				}
 			}
-
+	
 			// Commit transaction
 			$wpdb->query('COMMIT');
-
-			// Build the redirect URL properly
+	
+			// Build redirect arguments
 			$redirect_args = array(
-				'page' => 'LSAPP_litesurveys'
+				'page' => 'LSAPP_litesurveys',
+				'action' => 'edit',
+				'id' => $survey_id,
+				'message' => $save_type === 'publish' ? 'survey-published' : 'survey-saved'
 			);
-			
-			// Add action and ID if we're staying on the edit page
-			if ($survey_id) {
-				$redirect_args['action'] = 'edit';
-				$redirect_args['id'] = $survey_id;
-			}
-			
-			// Add the appropriate message
-			if ($save_type === 'publish') {
-				$redirect_args['message'] = 'survey-published';
-			} elseif ($save_type === 'unpublish') {
-				$redirect_args['message'] = 'survey-unpublished';
-			} else {
-				$redirect_args['message'] = 'survey-saved';
-			}
-
-			// Redirect with properly built URL
-			$redirect_url = add_query_arg($redirect_args, admin_url('admin.php'));
-			wp_safe_redirect($redirect_url);
+	
+			// Redirect with success message
+			wp_safe_redirect(add_query_arg($redirect_args, admin_url('admin.php')));
 			exit;
-
+	
 		} catch (Exception $e) {
 			// Rollback transaction
 			$wpdb->query('ROLLBACK');
-
-			$redirect_args = array(
-				'page' => 'LSAPP_litesurveys',
-				'message' => 'error',
-				'error' => urlencode($e->getMessage())
-			);
-			
-			if ($survey_id) {
-				$redirect_args['action'] = 'edit';
-				$redirect_args['id'] = $survey_id;
-			}
-
-			wp_safe_redirect(add_query_arg($redirect_args, admin_url('admin.php')));
+	
+			wp_safe_redirect(add_query_arg(
+				array(
+					'page' => 'LSAPP_litesurveys',
+					'action' => $survey_id ? 'edit' : 'new',
+					'id' => $survey_id,
+					'message' => 'error',
+					'error' => urlencode($e->getMessage())
+				),
+				admin_url('admin.php')
+			));
 			exit;
 		}
 	}
