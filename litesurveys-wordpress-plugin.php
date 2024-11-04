@@ -39,6 +39,7 @@ class LSAPP_LiteSurveys {
 		// Initialize hooks
 		add_action('admin_menu', array($this, 'addAdminMenu'));
 		add_action('admin_post_save_survey', array($this, 'handleSaveSurvey'));
+		add_action('admin_post_delete_survey', array($this, 'handleDeleteSurvey'));
 		add_action('admin_notices', array($this, 'displayAdminNotices'));
 		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
 		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
@@ -376,17 +377,91 @@ class LSAPP_LiteSurveys {
 		}
 	}
 
+	public function handleDeleteSurvey() {
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have sufficient permissions to access this page.', 'litesurveys'));
+		}
+
+		// Verify nonce
+		$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
+		$survey_id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
+
+		if (!wp_verify_nonce($nonce, 'delete-survey_' . $survey_id)) {
+			wp_die(__('Security check failed.', 'litesurveys'));
+		}
+
+		if (!$survey_id) {
+			wp_die(__('Invalid survey ID.', 'litesurveys'));
+		}
+
+		global $wpdb;
+
+		try {
+			// Start transaction
+			$wpdb->query('START TRANSACTION');
+
+			// Soft delete the survey
+			$result = $wpdb->update(
+				$wpdb->prefix . 'litesurveys_surveys',
+				array('deleted_at' => current_time('mysql')),
+				array('id' => $survey_id),
+				array('%s'),
+				array('%d')
+			);
+
+			if ($result === false) {
+				throw new Exception(__('Failed to delete survey.', 'litesurveys'));
+			}
+
+			// Soft delete associated questions
+			$wpdb->update(
+				$wpdb->prefix . 'litesurveys_questions',
+				array('deleted_at' => current_time('mysql')),
+				array('survey_id' => $survey_id),
+				array('%s'),
+				array('%d')
+			);
+
+			// Commit transaction
+			$wpdb->query('COMMIT');
+
+			// Redirect with success message
+			wp_safe_redirect(add_query_arg(
+				array(
+					'page' => 'LSAPP_litesurveys',
+					'message' => 'survey-deleted'
+				),
+				admin_url('admin.php')
+			));
+			exit;
+
+		} catch (Exception $e) {
+			// Rollback transaction
+			$wpdb->query('ROLLBACK');
+
+			// Redirect with error message
+			wp_safe_redirect(add_query_arg(
+				array(
+					'page' => 'LSAPP_litesurveys',
+					'message' => 'error',
+					'error' => urlencode($e->getMessage())
+				),
+				admin_url('admin.php')
+			));
+			exit;
+		}
+	}
+
 	public function displayAdminNotices() {
-		// Only show notices on our plugin pages
-		if (!isset($_GET['page']) || $_GET['page'] !== 'litesurveys') {
+		if (!isset($_GET['page']) || $_GET['page'] !== 'LSAPP_litesurveys') {
 			return;
 		}
-	
+
 		if (isset($_GET['message'])) {
 			$message_type = sanitize_text_field($_GET['message']);
 			$class = 'notice ';
 			$message = '';
-	
+
 			switch ($message_type) {
 				case 'survey-published':
 					$class .= 'notice-success';
@@ -400,14 +475,18 @@ class LSAPP_LiteSurveys {
 					$class .= 'notice-success';
 					$message = __('Survey saved successfully.', 'litesurveys');
 					break;
+				case 'survey-deleted':
+					$class .= 'notice-success';
+					$message = __('Survey deleted successfully.', 'litesurveys');
+					break;
 				case 'error':
 					$class .= 'notice-error';
 					$message = isset($_GET['error']) ? 
 						urldecode($_GET['error']) : 
-						__('An error occurred while saving the survey.', 'litesurveys');
+						__('An error occurred while processing your request.', 'litesurveys');
 					break;
 			}
-	
+
 			if ($message) {
 				printf(
 					'<div class="%1$s is-dismissible"><p>%2$s</p></div>',

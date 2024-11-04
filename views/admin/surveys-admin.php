@@ -53,8 +53,9 @@ if (!current_user_can('manage_options')) {
 									</a> | 
 								</span>
 								<span class="trash">
-									<a href="<?php echo wp_nonce_url(admin_url('admin.php?page=LSAPP_litesurveys&action=delete&id=' . $survey->id), 'delete-survey_' . $survey->id); ?>" 
-									   class="submitdelete">
+								<a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=delete_survey&id=' . $survey->id), 'delete-survey_' . $survey->id); ?>" 
+									class="submitdelete" 
+									onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete this survey?', 'litesurveys'); ?>');">
 										<?php _e('Delete', 'litesurveys'); ?>
 									</a>
 								</span>
