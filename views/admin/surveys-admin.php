@@ -18,7 +18,7 @@ if (!current_user_can('manage_options')) {
 			<tr>
 				<th scope="col" class="manage-column"><?php _e('Survey Name', 'litesurveys'); ?></th>
 				<th scope="col" class="manage-column"><?php _e('Status', 'litesurveys'); ?></th>
-				<th scope="col" class="manage-column"><?php _e('Responses', 'litesurveys'); ?></th>
+				<th scope="col" class="manage-column"><?php _e('Submissions', 'litesurveys'); ?></th>
 				<th scope="col" class="manage-column"><?php _e('Created', 'litesurveys'); ?></th>
 			</tr>
 		</thead>
@@ -49,14 +49,14 @@ if (!current_user_can('manage_options')) {
 								</span>
 								<span class="view">
 									<a href="<?php echo esc_url(admin_url('admin.php?page=LSAPP_litesurveys&action=view-responses&id=' . $survey->id)); ?>">
-										<?php _e('View Responses', 'litesurveys'); ?>
+										<?php _e('View Submissions', 'litesurveys'); ?>
 									</a> | 
 								</span>
 								<span class="trash">
 								<a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=delete_survey&id=' . $survey->id), 'delete-survey_' . $survey->id); ?>" 
 									class="submitdelete" 
-									onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete this survey?', 'litesurveys'); ?>');">
-										<?php _e('Delete', 'litesurveys'); ?>
+									onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete this survey and all of its submissions?', 'litesurveys'); ?>');">
+										<?php _e('Delete Survey & Submissions', 'litesurveys'); ?>
 									</a>
 								</span>
 							</div>
@@ -65,7 +65,7 @@ if (!current_user_can('manage_options')) {
 							<?php if ($survey->active) : ?>
 								<span class="status-active"><?php _e('Active', 'litesurveys'); ?></span>
 							<?php else : ?>
-								<span class="status-inactive"><?php _e('Draft', 'litesurveys'); ?></span>
+								<span class="status-inactive"><?php _e('Inactive', 'litesurveys'); ?></span>
 							<?php endif; ?>
 						</td>
 						<td>
