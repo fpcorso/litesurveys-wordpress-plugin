@@ -35,15 +35,22 @@ class LSAPP_LiteSurveys {
 	private function __construct() {
 		$this->plugin_path = plugin_dir_path(__FILE__);
 		$this->plugin_url = plugin_dir_url(__FILE__);
+
+		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
 		
-		// Initialize hooks
+		// Add Admin code
 		add_action('admin_menu', array($this, 'addAdminMenu'));
 		add_action('admin_post_save_survey', array($this, 'handleSaveSurvey'));
 		add_action('admin_post_delete_survey', array($this, 'handleDeleteSurvey'));
 		add_action('admin_notices', array($this, 'displayAdminNotices'));
 		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
 		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
-		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
+
+		// Add REST API endpoints
+		add_action('rest_api_init', array($this, 'register_rest_routes'));
+
+		// Add frontend script
+		add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
 	}
 
 	public function activatePlugin() {
@@ -480,6 +487,125 @@ class LSAPP_LiteSurveys {
 				);
 			}
 		}
+	}
+
+	public function register_rest_routes() {
+		register_rest_route('litesurveys/v1', '/surveys', array(
+			'methods' => 'GET',
+			'callback' => array($this, 'get_active_surveys'),
+			'permission_callback' => '__return_true'
+		));
+	
+		register_rest_route('litesurveys/v1', '/surveys/(?P<id>\d+)/submissions', array(
+			'methods' => 'POST',
+			'callback' => array($this, 'save_submission'),
+			'permission_callback' => '__return_true'
+		));
+	}
+	
+	public function get_active_surveys(WP_REST_Request $request) {
+		global $wpdb;
+		
+		// Get active survey with its question
+		$survey = $wpdb->get_row(
+			"SELECT s.*, 
+					q.id as question_id, 
+					q.type as question_type, 
+					q.content as question_content,
+					q.answers as question_answers
+			 FROM {$wpdb->prefix}litesurveys_surveys s
+			 LEFT JOIN {$wpdb->prefix}litesurveys_questions q ON s.id = q.survey_id
+			 WHERE s.active = 1 
+			 AND s.deleted_at IS NULL 
+			 AND q.deleted_at IS NULL
+			 LIMIT 1"
+		);
+		
+		if (!$survey) {
+			return new WP_REST_Response([], 200);
+		}
+		
+		// Format the response to match the expected schema
+		$response = array(
+			'id' => $survey->id,
+			'name' => $survey->name,
+			'active' => (bool)$survey->active,
+			'submit_message' => $survey->submit_message,
+			'targeting_settings' => json_decode($survey->targeting_settings),
+			'appearance_settings' => json_decode($survey->appearance_settings),
+			'questions' => array(
+				array(
+					'id' => $survey->question_id,
+					'type' => $survey->question_type,
+					'content' => $survey->question_content,
+					'answers' => json_decode($survey->question_answers)
+				)
+			)
+		);
+		
+		return new WP_REST_Response([$response], 200);
+	}
+	
+	public function save_submission(WP_REST_Request $request) {
+		global $wpdb;
+		
+		$survey_id = $request->get_param('id');
+		$body = json_decode($request->get_body(), true);
+		
+		try {
+			$wpdb->query('START TRANSACTION');
+			
+			// Create submission record
+			$wpdb->insert(
+				$wpdb->prefix . 'litesurveys_submissions',
+				array(
+					'survey_id' => $survey_id,
+					'page' => $body['page']
+				)
+			);
+			
+			$submission_id = $wpdb->insert_id;
+			
+			// Create response records
+			foreach ($body['responses'] as $response) {
+				$wpdb->insert(
+					$wpdb->prefix . 'litesurveys_responses',
+					array(
+						'submission_id' => $submission_id,
+						'question_id' => $response['question_id'],
+						'content' => $response['content']
+					)
+				);
+			}
+			
+			$wpdb->query('COMMIT');
+			return new WP_REST_Response(['status' => 'success'], 200);
+			
+		} catch (Exception $e) {
+			$wpdb->query('ROLLBACK');
+			return new WP_REST_Response(['status' => 'error'], 500);
+		}
+	}
+
+	public function enqueue_frontend_assets() {
+		wp_enqueue_style(
+			'litesurveys-frontend',
+			plugin_dir_url(__FILE__) . 'assets/css/frontend.css',
+			array(),
+			LSAPP_PLUGIN_VERSION
+		);
+		
+		wp_enqueue_script(
+			'litesurveys-frontend',
+			plugin_dir_url(__FILE__) . 'assets/js/frontend.js',
+			array(),
+			LSAPP_PLUGIN_VERSION,
+			true
+		);
+		
+		wp_localize_script('litesurveys-frontend', 'liteSurveysSettings', array(
+			'ajaxUrl' => rest_url('litesurveys/v1/')
+		));
 	}
 
 	/**
