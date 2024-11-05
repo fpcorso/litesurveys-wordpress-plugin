@@ -250,19 +250,26 @@ if (!current_user_can('manage_options')) {
 							<div class="submitbox">
 								<input type="hidden" name="save_type" id="save_type" value="draft">
 								<?php if ($survey->active) : ?>
-									<button type="submit" class="button button-large button-warning">
-										<?php esc_html_e('Save & Unpublish Survey', 'litesurveys'); ?>
-									</button>
+									<div style="margin-bottom: 10px;">
+										<button type="submit" class="button button-primary button-large">
+											<?php esc_html_e('Save Changes', 'litesurveys'); ?>
+										</button>
+									</div>
+									<div>
+										<button type="submit" class="button button-secondary button-large" style="color: #d63638;">
+											<?php esc_html_e('Save & Unpublish Survey', 'litesurveys'); ?>
+										</button>
+									</div>
 								<?php else : ?>
 									<button type="submit" class="button button-primary button-large">
 										<?php esc_html_e('Save & Publish Survey', 'litesurveys'); ?>
 									</button>
+									<div style="margin-top: 10px;">
+										<button type="submit" class="button button-large">
+											<?php echo esc_html('Save Draft'); ?>
+										</button>
+									</div>
 								<?php endif; ?>
-								<div style="margin-top: 10px;">
-									<button type="submit" class="button button-large">
-										<?php echo esc_html($survey->active ? 'Save Changes' : 'Save Draft'); ?>
-									</button>
-								</div>
 							</div>
 						</div>
 					</div>
