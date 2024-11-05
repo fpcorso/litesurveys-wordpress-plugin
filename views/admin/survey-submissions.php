@@ -8,7 +8,7 @@ if (!current_user_can('manage_options')) {
 
 <div class="wrap">
 	<h1 class="wp-heading-inline">
-		<?php printf(__('Responses: %s', 'litesurveys'), esc_html($survey->name)); ?>
+		<?php printf(__('Submissions: %s', 'litesurveys'), esc_html($survey->name)); ?>
 	</h1>
 	
 	<a href="<?php echo esc_url(admin_url('admin.php?page=LSAPP_litesurveys')); ?>" class="page-title-action">
@@ -19,7 +19,7 @@ if (!current_user_can('manage_options')) {
 
 	<?php if (empty($submissions)) : ?>
 		<div class="notice notice-warning">
-			<p><?php _e('This survey has not received any responses yet.', 'litesurveys'); ?></p>
+			<p><?php _e('This survey has not received any submissions yet.', 'litesurveys'); ?></p>
 		</div>
 	<?php else : ?>
 		<table class="wp-list-table widefat fixed striped">

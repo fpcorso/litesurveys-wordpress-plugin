@@ -193,7 +193,7 @@ class LSAPP_LiteSurveys {
 					$survey_id
 				));
 	
-				include($this->plugin_path . 'views/admin/survey-responses.php');
+				include($this->plugin_path . 'views/admin/survey-submissions.php');
 				break;
 			case 'edit':
 			case 'new':
