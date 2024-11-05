@@ -1,9 +1,8 @@
-// assets/js/frontend.js
 const liteSurveys = {
 	surveys: [],
 	templates: {
 		modal: `
-			<div class="litesurveys-slidein" tabindex="-1" role="dialog">
+			<div class="litesurveys-slidein" data-survey-id="" tabindex="-1" role="dialog">
 				<button class="litesurveys-slidein-close" aria-label="Close"></button>
 				<div class="litesurveys-slidein-content">
 					<div class="litesurveys-slidein-content-form">
@@ -32,36 +31,49 @@ const liteSurveys = {
 					return;
 				}
 				this.surveys = surveys;
-				this.prepareSurvey();
+				this.prepareSurveys();
 			});
 	},
 
-	prepareSurvey() {
-		this.addModalMarkup();
-		this.addSlideinListeners();
-		this.setPosition();
+	prepareSurveys() {
+		this.surveys.forEach(survey => {
+			this.addModalMarkup(survey);
+			this.addSlideinListeners(survey);
+			this.setPosition(survey);
 
-		// Add trigger based on settings
-		const trigger = this.surveys[0].targeting_settings.trigger[0];
-		if (trigger.type === 'auto') {
-			setTimeout(() => this.openModal(), trigger.auto_timing * 1000);
-		} else if (trigger.type === 'exit') {
-			document.addEventListener('mouseout', (event) => {
-				if (event.clientY <= 10) {
-					this.openModal();
+			// Add trigger based on settings
+			const trigger = survey.targeting_settings.trigger[0];
+			if (trigger.type === 'auto') {
+				setTimeout(() => this.openModal(survey.id), trigger.auto_timing * 1000);
+			} else if (trigger.type === 'exit') {
+				// Only add exit intent listener once, check all surveys when triggered
+				if (!this.exitIntentListenerAdded) {
+					document.addEventListener('mouseout', (event) => {
+						if (event.clientY <= 10) {
+							this.surveys.forEach(s => {
+								if (s.targeting_settings.trigger[0].type === 'exit') {
+									this.openModal(s.id);
+								}
+							});
+						}
+					});
+					this.exitIntentListenerAdded = true;
 				}
-			});
-		}
+			}
+		});
 	},
 
-	addModalMarkup() {
+	addModalMarkup(survey) {
 		// Create modal element
 		const modalElement = document.createElement('div');
 		modalElement.innerHTML = this.templates.modal.trim();
 		const modal = modalElement.firstChild;
+		
+		// Set survey ID
+		modal.dataset.surveyId = survey.id;
 
 		// Add question content
-		const question = this.surveys[0].questions[0];
+		const question = survey.questions[0];
 		modal.querySelector('.litesurveys-slide-content-label').textContent = question.content;
 
 		const controlDiv = modal.querySelector('.litesurveys-slide-content-control');
@@ -86,27 +98,31 @@ const liteSurveys = {
 		document.body.appendChild(modal);
 	},
 
-	setPosition() {
-		const horizontalPosition = this.surveys[0].appearance_settings?.horizontal_position || 'right';
+	setPosition(survey) {
+		const modal = document.querySelector(`.litesurveys-slidein[data-survey-id="${survey.id}"]`);
+		const horizontalPosition = survey.appearance_settings?.horizontal_position || 'right';
+		
 		if (horizontalPosition === 'left') {
-			document.documentElement.style.setProperty('--litesurveys-slidein-left-spacing', '1em');
+			modal.style.setProperty('--litesurveys-slidein-left-spacing', '1em');
+			modal.style.setProperty('--litesurveys-slidein-right-spacing', 'initial');
 		} else {
-			document.documentElement.style.setProperty('--litesurveys-slidein-right-spacing', '1em');
+			modal.style.setProperty('--litesurveys-slidein-left-spacing', 'initial');
+			modal.style.setProperty('--litesurveys-slidein-right-spacing', '1em');
 		}
 	},
 
-	addSlideinListeners() {
-		const modal = document.querySelector('.litesurveys-slidein');
+	addSlideinListeners(survey) {
+		const modal = document.querySelector(`.litesurveys-slidein[data-survey-id="${survey.id}"]`);
 
 		// Close button
 		modal.querySelector('.litesurveys-slidein-close').addEventListener('click', () => {
-			this.closeModal();
+			this.closeModal(survey.id);
 		});
 
 		// Multiple choice answers
 		modal.querySelectorAll('.litesurveys-answer-button').forEach(button => {
 			button.addEventListener('click', (e) => {
-				this.submitSurvey(e.target.textContent);
+				this.submitSurvey(survey.id, e.target.textContent);
 			});
 		});
 
@@ -116,34 +132,31 @@ const liteSurveys = {
 			submitButton.addEventListener('click', () => {
 				const answer = modal.querySelector('.litesurveys-slidein-content-textarea').value;
 				if (answer.trim()) {
-					this.submitSurvey(answer.trim());
+					this.submitSurvey(survey.id, answer.trim());
 				}
 			});
 		}
-
-		// Escape key handler
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
-				this.closeModal();
-			}
-		});
 	},
 
-	openModal() {
-		const cookieName = `litesurveys-slideinclosed-${this.surveys[0].id}`;
+	openModal(surveyId) {
+		const cookieName = `litesurveys-slideinclosed-${surveyId}`;
 		if (!this.getCookie(cookieName)) {
-			document.querySelector('.litesurveys-slidein').classList.add('litesurveys-is-active');
-			document.querySelector('.litesurveys-slidein').focus();
+			const modal = document.querySelector(`.litesurveys-slidein[data-survey-id="${surveyId}"]`);
+			modal.classList.add('litesurveys-is-active');
+			modal.focus();
 		}
 	},
 
-	closeModal() {
-		document.querySelector('.litesurveys-slidein').classList.remove('litesurveys-is-active');
-		this.setCookie(`litesurveys-slideinclosed-${this.surveys[0].id}`, 'yes', 365);
+	closeModal(surveyId) {
+		const modal = document.querySelector(`.litesurveys-slidein[data-survey-id="${surveyId}"]`);
+		modal.classList.remove('litesurveys-is-active');
+		this.setCookie(`litesurveys-slideinclosed-${surveyId}`, 'yes', 365);
 	},
 
-	submitSurvey(answer) {
-		const survey = this.surveys[0];
+	submitSurvey(surveyId, answer) {
+		const survey = this.surveys.find(s => s.id === surveyId);
+		if (!survey) return;
+
 		const submission = {
 			responses: [{
 				question_id: survey.questions[0].id,
@@ -152,7 +165,7 @@ const liteSurveys = {
 			page: window.location.href
 		};
 
-		fetch(liteSurveysSettings.ajaxUrl + `surveys/${survey.id}/submissions`, {
+		fetch(liteSurveysSettings.ajaxUrl + `surveys/${surveyId}/submissions`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -160,15 +173,16 @@ const liteSurveys = {
 			body: JSON.stringify(submission)
 		}).then(() => {
 			// Replace content with thank you message
-			const content = document.querySelector('.litesurveys-slidein-content');
+			const modal = document.querySelector(`.litesurveys-slidein[data-survey-id="${surveyId}"]`);
+			const content = modal.querySelector('.litesurveys-slidein-content');
 			const form = content.querySelector('.litesurveys-slidein-content-form');
 			form.innerHTML = survey.submit_message;
 
 			// Set cookie to prevent showing again
-			this.setCookie(`litesurveys-slideinclosed-${survey.id}`, 'yes', 365);
+			this.setCookie(`litesurveys-slideinclosed-${surveyId}`, 'yes', 365);
 
 			// Close after delay
-			setTimeout(() => this.closeModal(), 3000);
+			setTimeout(() => this.closeModal(surveyId), 3000);
 		});
 	},
 
