@@ -553,45 +553,47 @@ class LSAPP_LiteSurveys {
 	
 	public function get_active_surveys(WP_REST_Request $request) {
 		global $wpdb;
-		
-		// Get active survey with its question
-		$survey = $wpdb->get_row(
+	
+		// Get all active surveys with their questions
+		$surveys = $wpdb->get_results(
 			"SELECT s.*, 
 					q.id as question_id, 
 					q.type as question_type, 
 					q.content as question_content,
 					q.answers as question_answers
-			 FROM {$wpdb->prefix}litesurveys_surveys s
-			 LEFT JOIN {$wpdb->prefix}litesurveys_questions q ON s.id = q.survey_id
-			 WHERE s.active = 1 
-			 AND s.deleted_at IS NULL 
-			 AND q.deleted_at IS NULL
-			 LIMIT 1"
+			FROM {$wpdb->prefix}litesurveys_surveys s
+			LEFT JOIN {$wpdb->prefix}litesurveys_questions q ON s.id = q.survey_id
+			WHERE s.active = 1 
+			AND s.deleted_at IS NULL 
+			AND q.deleted_at IS NULL
+			ORDER BY s.created_at DESC"  // Added ordering to ensure consistent results
 		);
 		
-		if (!$survey) {
+		if (empty($surveys)) {
 			return new WP_REST_Response([], 200);
 		}
 		
-		// Format the response to match the expected schema
-		$response = array(
-			'id' => $survey->id,
-			'name' => $survey->name,
-			'active' => (bool)$survey->active,
-			'submit_message' => $survey->submit_message,
-			'targeting_settings' => json_decode($survey->targeting_settings),
-			'appearance_settings' => json_decode($survey->appearance_settings),
-			'questions' => array(
-				array(
-					'id' => $survey->question_id,
-					'type' => $survey->question_type,
-					'content' => $survey->question_content,
-					'answers' => json_decode($survey->question_answers)
+		// Format all surveys for response
+		$response = array_map(function($survey) {
+			return array(
+				'id' => $survey->id,
+				'name' => $survey->name,
+				'active' => (bool)$survey->active,
+				'submit_message' => $survey->submit_message,
+				'targeting_settings' => json_decode($survey->targeting_settings),
+				'appearance_settings' => json_decode($survey->appearance_settings),
+				'questions' => array(
+					array(
+						'id' => $survey->question_id,
+						'type' => $survey->question_type,
+						'content' => $survey->question_content,
+						'answers' => json_decode($survey->question_answers)
+					)
 				)
-			)
-		);
+			);
+		}, $surveys);
 		
-		return new WP_REST_Response([$response], 200);
+		return new WP_REST_Response($response, 200);
 	}
 	
 	public function save_submission(WP_REST_Request $request) {
