@@ -164,6 +164,37 @@ class LSAPP_LiteSurveys {
 		$action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
 		
 		switch ($action) {
+			case 'view-responses':
+				$survey_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+				if (!$survey_id) {
+					wp_die(__('Invalid survey ID.', 'litesurveys'));
+				}
+	
+				// Get survey data with question
+				$survey = $wpdb->get_row($wpdb->prepare(
+					"SELECT s.*, q.content as question_content 
+					 FROM {$wpdb->prefix}litesurveys_surveys s 
+					 LEFT JOIN {$wpdb->prefix}litesurveys_questions q ON s.id = q.survey_id 
+					 WHERE s.id = %d AND s.deleted_at IS NULL",
+					$survey_id
+				));
+	
+				if (!$survey) {
+					wp_die(__('Survey not found.', 'litesurveys'));
+				}
+	
+				// Get submissions with responses
+				$submissions = $wpdb->get_results($wpdb->prepare(
+					"SELECT s.created_at, s.page, r.content as response
+					 FROM {$wpdb->prefix}litesurveys_submissions s
+					 LEFT JOIN {$wpdb->prefix}litesurveys_responses r ON s.id = r.submission_id
+					 WHERE s.survey_id = %d AND s.deleted_at IS NULL
+					 ORDER BY s.created_at DESC",
+					$survey_id
+				));
+	
+				include($this->plugin_path . 'views/admin/survey-responses.php');
+				break;
 			case 'edit':
 			case 'new':
 				// Get survey data if editing
