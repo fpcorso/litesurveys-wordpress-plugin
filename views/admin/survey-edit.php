@@ -11,6 +11,10 @@ if (!current_user_can('manage_options')) {
 		<?php echo $survey_id ? 'Edit Survey: ' . esc_html($survey->name) : 'Create New Survey'; ?>
 	</h1>
 	
+	<a href="<?php echo esc_url(admin_url('admin.php?page=LSAPP_litesurveys')); ?>" class="page-title-action">
+		<?php _e('← Back to Surveys', 'litesurveys'); ?>
+	</a>
+	
 	<hr class="wp-header-end">
 	
 	<form id="survey-edit-form" method="post" action="<?php echo admin_url('admin-post.php'); ?>">
