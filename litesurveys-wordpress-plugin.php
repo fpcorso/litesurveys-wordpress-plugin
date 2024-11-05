@@ -587,11 +587,12 @@ class LSAPP_LiteSurveys {
 			$wpdb->query('START TRANSACTION');
 			
 			// Create submission record
+			$page_path = $this->get_path_from_url($body['page']);
 			$wpdb->insert(
 				$wpdb->prefix . 'litesurveys_submissions',
 				array(
 					'survey_id' => $survey_id,
-					'page' => $body['page']
+					'page' => $page_path
 				)
 			);
 			
@@ -656,6 +657,17 @@ class LSAPP_LiteSurveys {
 			$actions = array_merge( ['litesurveys_settings' => $settings_url], $actions) ;
 		}
 		return $actions;
+	}
+
+	/**
+	 * Gets the path from a URL.
+	 *
+	 * @param string $url The full URL
+	 * @return string The path component of the URL
+	 */
+	private function get_path_from_url($url) {
+		$path = parse_url($url, PHP_URL_PATH);
+		return empty($path) ? '/' : $path;
 	}
 }
 
