@@ -169,31 +169,48 @@ class LSAPP_LiteSurveys {
 				if (!$survey_id) {
 					wp_die(__('Invalid survey ID.', 'litesurveys'));
 				}
-	
+
 				// Get survey data with question
 				$survey = $wpdb->get_row($wpdb->prepare(
 					"SELECT s.*, q.content as question_content 
-					 FROM {$wpdb->prefix}litesurveys_surveys s 
-					 LEFT JOIN {$wpdb->prefix}litesurveys_questions q ON s.id = q.survey_id 
-					 WHERE s.id = %d AND s.deleted_at IS NULL",
+					FROM {$wpdb->prefix}litesurveys_surveys s 
+					LEFT JOIN {$wpdb->prefix}litesurveys_questions q ON s.id = q.survey_id 
+					WHERE s.id = %d AND s.deleted_at IS NULL",
 					$survey_id
 				));
-	
+
 				if (!$survey) {
 					wp_die(__('Survey not found.', 'litesurveys'));
 				}
-	
+
+				// Pagination settings
+				$per_page = 20;
+				$current_page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+				$offset = ($current_page - 1) * $per_page;
+
+				// Get total count for pagination
+				$total_items = $wpdb->get_var($wpdb->prepare(
+					"SELECT COUNT(*) 
+					FROM {$wpdb->prefix}litesurveys_submissions s
+					WHERE s.survey_id = %d AND s.deleted_at IS NULL",
+					$survey_id
+				));
+
 				// Get submissions with responses
 				$submissions = $wpdb->get_results($wpdb->prepare(
 					"SELECT s.created_at, s.page, r.content as response
-					 FROM {$wpdb->prefix}litesurveys_submissions s
-					 LEFT JOIN {$wpdb->prefix}litesurveys_responses r ON s.id = r.submission_id
-					 WHERE s.survey_id = %d AND s.deleted_at IS NULL
-					 ORDER BY s.created_at DESC",
-					$survey_id
+					FROM {$wpdb->prefix}litesurveys_submissions s
+					LEFT JOIN {$wpdb->prefix}litesurveys_responses r ON s.id = r.submission_id
+					WHERE s.survey_id = %d AND s.deleted_at IS NULL
+					ORDER BY s.created_at DESC
+					LIMIT %d OFFSET %d",
+					$survey_id, $per_page, $offset
 				));
-	
-				include($this->plugin_path . 'views/admin/survey-submissions.php');
+
+				// Calculate pagination values
+				$total_pages = ceil($total_items / $per_page);
+
+				include($this->plugin_path . 'views/admin/survey-submissions.php');  // Updated filename
 				break;
 			case 'edit':
 			case 'new':

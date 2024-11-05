@@ -22,6 +22,31 @@ if (!current_user_can('manage_options')) {
 			<p><?php _e('This survey has not received any submissions yet.', 'litesurveys'); ?></p>
 		</div>
 	<?php else : ?>
+		<div class="tablenav top">
+			<div class="tablenav-pages">
+				<span class="displaying-num">
+					<?php printf(
+						_n('%s submission', '%s submissions', $total_items, 'litesurveys'),
+						number_format_i18n($total_items)
+					); ?>
+				</span>
+				<?php if ($total_pages > 1) : ?>
+					<span class="pagination-links">
+						<?php
+						echo paginate_links(array(
+							'base' => add_query_arg('paged', '%#%'),
+							'format' => '',
+							'prev_text' => '&lsaquo;',
+							'next_text' => '&rsaquo;',
+							'total' => $total_pages,
+							'current' => $current_page
+						));
+						?>
+					</span>
+				<?php endif; ?>
+			</div>
+		</div>
+
 		<table class="wp-list-table widefat fixed striped">
 			<thead>
 				<tr>
@@ -47,5 +72,24 @@ if (!current_user_can('manage_options')) {
 				<?php endforeach; ?>
 			</tbody>
 		</table>
+
+		<div class="tablenav bottom">
+			<div class="tablenav-pages">
+				<?php if ($total_pages > 1) : ?>
+					<span class="pagination-links">
+						<?php
+						echo paginate_links(array(
+							'base' => add_query_arg('paged', '%#%'),
+							'format' => '',
+							'prev_text' => '&lsaquo;',
+							'next_text' => '&rsaquo;',
+							'total' => $total_pages,
+							'current' => $current_page
+						));
+						?>
+					</span>
+				<?php endif; ?>
+			</div>
+		</div>
 	<?php endif; ?>
 </div>
