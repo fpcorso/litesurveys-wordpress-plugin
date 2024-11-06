@@ -189,33 +189,24 @@ class LSAPP_LiteSurveys {
 			return;
 		}
 
-		$min = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 		$action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
 	
 		if ($action === 'edit' || $action === 'new') {
+			$suffix = $this->get_asset_suffix();
 			wp_enqueue_style(
 				'litesurveys-admin',
-				$this->plugin_url . "resources/css/admin{$min}.css",
+				$this->plugin_url . "resources/css/admin{$suffix}.css",
 				array(),
 				self::VERSION
 			);
-	
+
 			wp_enqueue_script(
 				'litesurveys-admin',
-				$this->plugin_url . "resources/js/admin{$min}.js",
+				$this->plugin_url . "resources/js/admin{$suffix}.js",
 				array('jquery'),
 				self::VERSION,
 				true
 			);
-
-			wp_localize_script('litesurveys-admin', 'liteSurveysAdmin', array(
-				'ajaxUrl' => admin_url('admin-ajax.php'),
-				'nonce' => wp_create_nonce('litesurveys-admin'),
-				'strings' => array(
-					'confirmDelete' => __('Are you sure you want to delete this survey?', 'litesurveys'),
-					'errorMessage' => __('An error occurred.', 'litesurveys'),
-				),
-			));
 		}
 	}
 
@@ -355,15 +346,13 @@ class LSAPP_LiteSurveys {
 	}
 
 	public function handleSaveSurvey() {
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have sufficient permissions to access this page.', 'litesurveys'));
-		}
-	
+		$this->verify_admin_access();
+
 		check_admin_referer('save_survey', 'survey_nonce');
 		
 		global $wpdb;
 		
-		$survey_id = isset($_POST['survey_id']) ? intval($_POST['survey_id']) : 0;
+		$survey_id = isset($_POST['survey_id']) ? absint($_POST['survey_id']) : 0;
 		$save_type = isset($_POST['save_type']) ? sanitize_text_field($_POST['save_type']) : 'draft';
 		
 		try {
@@ -371,39 +360,65 @@ class LSAPP_LiteSurveys {
 			if (empty($_POST['survey_name'])) {
 				throw new Exception(__('Survey name is required.', 'litesurveys'));
 			}
-	
+
 			if (empty($_POST['question_content'])) {
 				throw new Exception(__('Survey question is required.', 'litesurveys'));
 			}
+
+			// Prepare targeting settings
+			$targeting_settings = array(
+				'targets' => array(
+					'show' => sanitize_text_field($_POST['targeting_show']),
+					'includes' => isset($_POST['includes']) ? 
+						array_map('sanitize_text_field', $_POST['includes']) : array(),
+					'excludes' => isset($_POST['excludes']) ? 
+						array_map('sanitize_text_field', $_POST['excludes']) : array()
+				),
+				'trigger' => array(
+					array(
+						'type' => sanitize_text_field($_POST['trigger_type']),
+						'auto_timing' => absint($_POST['auto_timing'])
+					)
+				)
+			);
+
+			// Prepare appearance settings
+			$appearance_settings = array(
+				'horizontal_position' => sanitize_text_field($_POST['horizontal_position'])
+			);
+
+			// Sanitize JSON data
+			$targeting_json = $this->sanitize_json_data($targeting_settings);
+			$appearance_json = $this->sanitize_json_data($appearance_settings);
+
+			if (false === $targeting_json || false === $appearance_json) {
+				throw new Exception(__('Invalid settings data.', 'litesurveys'));
+			}
+
 	
 			// Prepare survey data
 			$survey_data = array(
 				'name' => sanitize_text_field($_POST['survey_name']),
 				'submit_message' => sanitize_textarea_field($_POST['submit_message']),
 				'active' => ($save_type === 'publish'),
-				'targeting_settings' => json_encode([
-					'targets' => [
-						'show' => sanitize_text_field($_POST['targeting_show']),
-						'includes' => isset($_POST['includes']) ? array_map('sanitize_text_field', $_POST['includes']) : [],
-						'excludes' => isset($_POST['excludes']) ? array_map('sanitize_text_field', $_POST['excludes']) : []
-					],
-					'trigger' => [[
-						'type' => sanitize_text_field($_POST['trigger_type']),
-						'auto_timing' => intval($_POST['auto_timing'])
-					]]
-				]),
-				'appearance_settings' => json_encode([
-					'horizontal_position' => sanitize_text_field($_POST['horizontal_position'])
-				])
+				'targeting_settings' => $targeting_json,
+				'appearance_settings' => $appearance_json
 			);
-	
+
+			// Prepare answers for multiple choice
+			$answers = array();
+			if ($_POST['question_type'] === 'multiple-choice' && !empty($_POST['answers'])) {
+				$answers = array_filter(array_map('sanitize_text_field', $_POST['answers']));
+				if (count($answers) < 2) {
+					throw new Exception(__('Multiple choice questions must have at least 2 answers.', 'litesurveys'));
+				}
+			}
+
 			// Prepare question data
 			$question_data = array(
 				'type' => sanitize_text_field($_POST['question_type']),
 				'content' => sanitize_textarea_field($_POST['question_content']),
-				'answers' => $_POST['question_type'] === 'multiple-choice' ? 
-							json_encode(array_map('sanitize_text_field', array_filter($_POST['answers']))) : 
-							json_encode([])
+				'answers' => $this->sanitize_json_data($answers)
 			);
 	
 			// Start transaction
@@ -493,9 +508,7 @@ class LSAPP_LiteSurveys {
 	}
 
 	public function handleDeleteSurvey() {
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have sufficient permissions to access this page.', 'litesurveys'));
-		}
+		$this->verify_admin_access();
 
 		// Verify nonce
 		$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
@@ -568,9 +581,7 @@ class LSAPP_LiteSurveys {
 	}
 
 	public function handleDeleteSubmission() {
-		if (!current_user_can('manage_options')) {
-			wp_die(__('You do not have sufficient permissions to access this page.', 'litesurveys'));
-		}
+		$this->verify_admin_access();
 	
 		// Verify nonce
 		$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
@@ -647,8 +658,11 @@ class LSAPP_LiteSurveys {
 		}
 	}
 	
+	/**
+	 * Display admin notices with proper escaping.
+	 */
 	public function displayAdminNotices() {
-		if (!isset($_GET['page']) || $_GET['page'] !== 'LSAPP_litesurveys') {
+		if (!isset($_GET['page']) || 'LSAPP_litesurveys' !== $_GET['page']) {
 			return;
 		}
 
@@ -681,18 +695,18 @@ class LSAPP_LiteSurveys {
 				case 'error':
 					$class .= 'notice-error';
 					$message = isset($_GET['error']) ? 
-						urldecode($_GET['error']) : 
+						sanitize_text_field(urldecode($_GET['error'])) : 
 						__('An error occurred while processing your request.', 'litesurveys');
 					break;
+				default:
+					return; // Unknown message type
 			}
 
-			if ($message) {
-				printf(
-					'<div class="%1$s is-dismissible"><p>%2$s</p></div>',
-					esc_attr($class),
-					esc_html($message)
-				);
-			}
+			printf(
+				'<div class="%1$s is-dismissible"><p>%2$s</p></div>',
+				esc_attr($class),
+				esc_html($message)
+			);
 		}
 	}
 
@@ -864,16 +878,18 @@ class LSAPP_LiteSurveys {
 	}
 
 	public function enqueue_frontend_assets() {
+		$suffix = $this->get_asset_suffix();
+		
 		wp_enqueue_style(
 			'litesurveys-frontend',
-			plugin_dir_url(__FILE__) . 'resources/css/frontend.css',
+			$this->plugin_url . "resources/css/frontend{$suffix}.css",
 			array(),
 			self::VERSION
 		);
 		
 		wp_enqueue_script(
 			'litesurveys-frontend',
-			plugin_dir_url(__FILE__) . 'resources/js/frontend.js',
+			$this->plugin_url . "resources/js/frontend{$suffix}.js",
 			array(),
 			self::VERSION,
 			true
@@ -921,6 +937,43 @@ class LSAPP_LiteSurveys {
 				403
 			);
 		}
+	}
+
+	/**
+	 * Sanitize JSON data before storage.
+	 *
+	 * @param array $data The data to be sanitized and stored as JSON.
+	 * @return string|false Sanitized JSON string or false on failure.
+	 */
+	private function sanitize_json_data($data) {
+		if (!is_array($data)) {
+			return false;
+		}
+
+		array_walk_recursive($data, function(&$value) {
+			if (is_string($value)) {
+				$value = sanitize_text_field($value);
+			} elseif (is_int($value)) {
+				$value = intval($value);
+			} elseif (is_float($value)) {
+				$value = floatval($value);
+			} elseif (is_bool($value)) {
+				$value = (bool)$value;
+			} else {
+				$value = '';
+			}
+		});
+
+		return wp_json_encode($data);
+	}
+
+	/**
+	 * Get the suffix for asset files (.min in production, empty in debug).
+	 *
+	 * @return string
+	 */
+	private function get_asset_suffix() {
+		return defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 	}
 }
 
