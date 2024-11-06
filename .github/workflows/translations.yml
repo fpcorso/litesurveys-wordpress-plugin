@@ -1,0 +1,40 @@
+name: Generate Translations
+
+on:
+	push:
+		branches:
+			- main
+		paths:
+			- '**.php'
+			- '**.js'
+	pull_request:
+		branches:
+			- main
+		paths:
+			- '**.php'
+			- '**.js'
+
+jobs:
+	generate-translations:
+		runs-on: ubuntu-latest
+
+		steps:
+			- uses: actions/checkout@v4
+
+			- name: Setup PHP
+				uses: shivammathur/setup-php@v2
+				with:
+					php-version: '8.1'
+					tools: wp-cli
+
+			- name: Generate POT file
+				run: wp i18n make-pot . languages/litesurveys.pot --exclude="node_modules/,vendor/,tests/"
+
+			- name: Generate JSON translations for JavaScript
+				run: wp i18n make-json languages --no-purge
+
+			- name: Commit translation files
+				uses: stefanzweifel/git-auto-commit-action@v5
+				with:
+					commit_message: "chore: update translation files"
+					file_pattern: 'languages/*'
