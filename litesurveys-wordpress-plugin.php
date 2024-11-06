@@ -120,26 +120,23 @@ class LSAPP_LiteSurveys {
 	}
 
 	public function enqueueAdminAssets($hook) {
-		// Only load on our plugin pages
 		if (strpos($hook, 'litesurveys') === false) {
 			return;
 		}
-
-		// Get the current admin page action
+	
 		$action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
-
-		// Only load on edit/new survey pages
+	
 		if ($action === 'edit' || $action === 'new') {
 			wp_enqueue_style(
-				'litesurveys-admin-edit',
-				plugin_dir_url(__FILE__) . 'admin/css/survey-edit.css',
+				'litesurveys-admin',
+				plugin_dir_url(__FILE__) . 'resources/css/admin.css',
 				array(),
 				LSAPP_PLUGIN_VERSION
 			);
-
+	
 			wp_enqueue_script(
-				'litesurveys-admin-edit',
-				plugin_dir_url(__FILE__) . 'admin/js/survey-edit.js',
+				'litesurveys-admin',
+				plugin_dir_url(__FILE__) . 'resources/js/admin.js',
 				array('jquery'),
 				LSAPP_PLUGIN_VERSION,
 				true
@@ -600,6 +597,10 @@ class LSAPP_LiteSurveys {
 					$class .= 'notice-success';
 					$message = __('Survey deleted successfully.', 'litesurveys');
 					break;
+				case 'submission-deleted':
+					$class .= 'notice-success';
+					$message = __('Submission deleted successfully.', 'litesurveys');
+					break;
 				case 'error':
 					$class .= 'notice-error';
 					$message = isset($_GET['error']) ? 
@@ -722,14 +723,14 @@ class LSAPP_LiteSurveys {
 	public function enqueue_frontend_assets() {
 		wp_enqueue_style(
 			'litesurveys-frontend',
-			plugin_dir_url(__FILE__) . 'assets/css/frontend.css',
+			plugin_dir_url(__FILE__) . 'resources/css/frontend.css',
 			array(),
 			LSAPP_PLUGIN_VERSION
 		);
 		
 		wp_enqueue_script(
 			'litesurveys-frontend',
-			plugin_dir_url(__FILE__) . 'assets/js/frontend.js',
+			plugin_dir_url(__FILE__) . 'resources/js/frontend.js',
 			array(),
 			LSAPP_PLUGIN_VERSION,
 			true
