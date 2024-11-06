@@ -21,14 +21,15 @@ if (!file_exists($_tests_dir . '/includes/functions.php')) {
 require_once $_tests_dir . '/includes/functions.php';
 
 /**
- * Manually load and activate our plugin
+ * Manually load plugin and create tables
  */
 function _manually_load_plugin() {
+	global $wpdb;
 	require dirname(__DIR__) . '/litesurveys-wordpress-plugin.php';
 	
-	// Activate plugin to create tables
+	// Get plugin instance and create tables
 	$plugin = LSAPP_LiteSurveys::get_instance();
-	$plugin->activate_plugin();
+	$plugin->create_database_tables($wpdb->get_charset_collate());
 }
 tests_add_filter('muplugins_loaded', '_manually_load_plugin');
 
