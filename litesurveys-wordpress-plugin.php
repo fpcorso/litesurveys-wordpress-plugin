@@ -17,15 +17,50 @@
 // Exits if accessed directly.
 defined('ABSPATH') or die('Direct access not permitted.');
 
-// Define plugin version constant.
-define('LSAPP_PLUGIN_VERSION', '1.0.3');
-
 class LSAPP_LiteSurveys {
+	/**
+	 * Plugin version.
+	 *
+	 * @var string
+	 */
+	const VERSION = '1.0.3';
+
+	/**
+	 * The single instance of the class.
+	 *
+	 * @var LSAPP_LiteSurveys
+	 */
 	private static $instance = null;
+	
+	/**
+	 * Plugin path.
+	 *
+	 * @var string
+	 */
 	private $plugin_path;
+
+	/**
+	 * Plugin URL.
+	 *
+	 * @var string
+	 */
 	private $plugin_url;
+
+	/**
+	 * Our REST Namespace for LiteSurveys
+	 *
+	 * @var string
+	 */
 	const REST_NAMESPACE = 'litesurveys/v1';
 
+
+	/**
+	 * Main LSAPP_LiteSurveys Instance.
+	 *
+	 * Ensures only one instance of LSAPP_LiteSurveys is loaded or can be loaded.
+	 *
+	 * @return LSAPP_LiteSurveys - Main instance.
+	 */
 	public static function getInstance() {
 		if (self::$instance == null) {
 			self::$instance = new self();
@@ -33,10 +68,20 @@ class LSAPP_LiteSurveys {
 		return self::$instance;
 	}
 
+	/**
+	 * LSAPP_LiteSurveys Constructor.
+	 */
 	private function __construct() {
 		$this->plugin_path = plugin_dir_path(__FILE__);
 		$this->plugin_url = plugin_dir_url(__FILE__);
 
+		$this->init_hooks();
+	}
+
+	/**
+	 * Initialize WordPress hooks.
+	 */
+	private function init_hooks() {
 		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
 		
 		// Add Admin code
@@ -57,8 +102,24 @@ class LSAPP_LiteSurveys {
 
 	public function activatePlugin() {
 		global $wpdb;
+		
+		if (!current_user_can('activate_plugins')) {
+			return;
+		}
+		
 		$charset_collate = $wpdb->get_charset_collate();
 
+		$this->create_database_tables($charset_collate);
+
+		add_option('lsapp_litesurveys_version', self::VERSION);
+	}
+
+	/**
+	 * Create plugin database tables.
+	 *
+	 * @param string $charset_collate Database charset and collation.
+	 */
+	private function create_database_tables($charset_collate) {
 		// Create surveys table
 		$sql_surveys = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}litesurveys_surveys (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -116,32 +177,45 @@ class LSAPP_LiteSurveys {
 		dbDelta($sql_questions);
 		dbDelta($sql_submissions);
 		dbDelta($sql_responses);
-
-		add_option('lsapp_litesurveys_version', '2.0.0');
 	}
 
+	/**
+	 * Enqueue admin scripts and styles.
+	 *
+	 * @param string $hook The current admin page.
+	 */
 	public function enqueueAdminAssets($hook) {
 		if (strpos($hook, 'litesurveys') === false) {
 			return;
 		}
-	
+
+		$min = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
 		$action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'list';
 	
 		if ($action === 'edit' || $action === 'new') {
 			wp_enqueue_style(
 				'litesurveys-admin',
-				plugin_dir_url(__FILE__) . 'resources/css/admin.css',
+				$this->plugin_url . "resources/css/admin{$min}.css",
 				array(),
-				LSAPP_PLUGIN_VERSION
+				self::VERSION
 			);
 	
 			wp_enqueue_script(
 				'litesurveys-admin',
-				plugin_dir_url(__FILE__) . 'resources/js/admin.js',
+				$this->plugin_url . "resources/js/admin{$min}.js",
 				array('jquery'),
-				LSAPP_PLUGIN_VERSION,
+				self::VERSION,
 				true
 			);
+
+			wp_localize_script('litesurveys-admin', 'liteSurveysAdmin', array(
+				'ajaxUrl' => admin_url('admin-ajax.php'),
+				'nonce' => wp_create_nonce('litesurveys-admin'),
+				'strings' => array(
+					'confirmDelete' => __('Are you sure you want to delete this survey?', 'litesurveys'),
+					'errorMessage' => __('An error occurred.', 'litesurveys'),
+				),
+			));
 		}
 	}
 
@@ -794,14 +868,14 @@ class LSAPP_LiteSurveys {
 			'litesurveys-frontend',
 			plugin_dir_url(__FILE__) . 'resources/css/frontend.css',
 			array(),
-			LSAPP_PLUGIN_VERSION
+			self::VERSION
 		);
 		
 		wp_enqueue_script(
 			'litesurveys-frontend',
 			plugin_dir_url(__FILE__) . 'resources/js/frontend.js',
 			array(),
-			LSAPP_PLUGIN_VERSION,
+			self::VERSION,
 			true
 		);
 		
