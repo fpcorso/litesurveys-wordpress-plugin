@@ -146,7 +146,7 @@ class LSAPP_LiteSurveys {
 	 * @since 1.0.0
 	 * @param string $charset_collate Database charset and collation.
 	 */
-	private function create_database_tables( $charset_collate ) {
+	protected function create_database_tables( $charset_collate ) {
 		global $wpdb;
 
 		// Create surveys table.
