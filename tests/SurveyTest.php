@@ -32,11 +32,11 @@ class SurveyTest extends WP_UnitTestCase {
 
 	public function test_create_survey() {
 		// Set up test data
-		$survey_data = array(
+		$_POST = array(
 			'survey_name' => 'Test Survey',
 			'question_type' => 'multiple-choice',
 			'question_content' => 'Test Question',
-			'answers' => array( 'Answer 1', 'Answer 2' ),
+			'answers' => array('Answer 1', 'Answer 2'),
 			'submit_message' => 'Thank you!',
 			'targeting_show' => 'all',
 			'trigger_type' => 'auto',
@@ -45,13 +45,18 @@ class SurveyTest extends WP_UnitTestCase {
 			'save_type' => 'publish'
 		);
 
-		// Simulate form submission
-		$_POST = $survey_data;
-		$_POST['survey_nonce'] = wp_create_nonce( 'save_survey' );
+		// Set up valid nonce
+		$_REQUEST['_wpnonce'] = $_POST['survey_nonce'] = wp_create_nonce('save_survey');
 		$_POST['action'] = 'save_survey';
 
 		// Call the handler
-		$this->plugin->handle_save_survey();
+		try {
+			$this->plugin->handle_save_survey();
+		} catch (WPDieException $e) {
+			// We expect a wp_redirect() which throws WPDieException in tests
+			// Verify it was a success redirect
+			$this->assertStringContainsString('survey-published', $e->getMessage());
+		}
 
 		// Get the created survey from the database
 		global $wpdb;
@@ -59,12 +64,11 @@ class SurveyTest extends WP_UnitTestCase {
 			"SELECT * FROM {$wpdb->prefix}litesurveys_surveys ORDER BY id DESC LIMIT 1"
 		);
 
-		// Assert survey was created correctly
-		$this->assertNotNull( $survey );
-		$this->assertEquals( 'Test Survey', $survey->name );
-		$this->assertEquals( 1, $survey->active );
+		$this->assertNotNull($survey);
+		$this->assertEquals('Test Survey', $survey->name);
+		$this->assertEquals(1, $survey->active);
 
-		// Get the associated question
+		// Verify question creation
 		$question = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT * FROM {$wpdb->prefix}litesurveys_questions WHERE survey_id = %d",
@@ -72,16 +76,122 @@ class SurveyTest extends WP_UnitTestCase {
 			)
 		);
 
-		// Assert question was created correctly
-		$this->assertNotNull( $question );
-		$this->assertEquals( 'Test Question', $question->content );
-		$this->assertEquals( 'multiple-choice', $question->type );
+		$this->assertNotNull($question);
+		$this->assertEquals('Test Question', $question->content);
+		$this->assertEquals('multiple-choice', $question->type);
 		
-		// Check answers were stored correctly
-		$answers = json_decode( $question->answers );
-		$this->assertCount( 2, $answers );
-		$this->assertEquals( 'Answer 1', $answers[0] );
-		$this->assertEquals( 'Answer 2', $answers[1] );
+		$answers = json_decode($question->answers);
+		$this->assertCount(2, $answers);
+		$this->assertEquals('Answer 1', $answers[0]);
+		$this->assertEquals('Answer 2', $answers[1]);
+	}
+
+	public function test_save_survey_validation() {
+		$_POST = array(
+			'survey_name' => '', // Empty name should fail
+			'question_type' => 'multiple-choice',
+			'question_content' => 'Test Question',
+			'answers' => array('Answer 1'),  // Only one answer should fail
+			'submit_message' => 'Thank you!',
+			'targeting_show' => 'all',
+			'trigger_type' => 'auto',
+			'auto_timing' => 5,
+			'horizontal_position' => 'right',
+			'save_type' => 'publish'
+		);
+
+		$_REQUEST['_wpnonce'] = $_POST['survey_nonce'] = wp_create_nonce('save_survey');
+		$_POST['action'] = 'save_survey';
+
+		try {
+			$this->plugin->handle_save_survey();
+			$this->fail('Expected validation to fail');
+		} catch (WPDieException $e) {
+			$this->assertStringContainsString('error', $e->getMessage());
+		}
+	}
+
+	public function test_save_survey_as_draft() {
+		$_POST = array(
+			'survey_name' => 'Draft Survey',
+			'question_type' => 'open-answer',
+			'question_content' => 'Test Question',
+			'submit_message' => 'Thank you!',
+			'targeting_show' => 'all',
+			'trigger_type' => 'auto',
+			'auto_timing' => 5,
+			'horizontal_position' => 'right',
+			'save_type' => 'draft'
+		);
+
+		$_REQUEST['_wpnonce'] = $_POST['survey_nonce'] = wp_create_nonce('save_survey');
+		$_POST['action'] = 'save_survey';
+
+		try {
+			$this->plugin->handle_save_survey();
+		} catch (WPDieException $e) {
+			$this->assertStringContainsString('survey-saved', $e->getMessage());
+		}
+
+		global $wpdb;
+		$survey = $wpdb->get_row(
+			"SELECT * FROM {$wpdb->prefix}litesurveys_surveys ORDER BY id DESC LIMIT 1"
+		);
+
+		$this->assertEquals(0, $survey->active);
+	}
+
+	public function test_delete_survey() {
+		// First create a survey
+		$survey_id = $this->create_test_survey();
+		
+		// Set up delete request
+		$_REQUEST['_wpnonce'] = wp_create_nonce('delete-survey_' . $survey_id);
+		$_REQUEST['action'] = 'delete_survey';
+		$_REQUEST['id'] = $survey_id;
+
+		try {
+			$this->plugin->handle_delete_survey();
+		} catch (WPDieException $e) {
+			$this->assertStringContainsString('survey-deleted', $e->getMessage());
+		}
+
+		global $wpdb;
+		$survey = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}litesurveys_surveys WHERE id = %d",
+				$survey_id
+			)
+		);
+
+		$this->assertNotNull($survey->deleted_at);
+	}
+
+	public function test_rest_api_submission() {
+		$survey_id = $this->create_test_survey();
+		
+		$request = new WP_REST_Request('POST', "/litesurveys/v1/surveys/{$survey_id}/submissions");
+		$request->set_body(json_encode([
+			'responses' => [
+				[
+					'question_id' => 1,
+					'content' => 'Answer 1'
+				]
+			],
+			'page' => 'https://example.com/test-page'
+		]));
+
+		$rest_api = $this->plugin->get_rest_api();
+		$response = $rest_api->save_submission($request);
+		
+		$this->assertEquals(200, $response->get_status());
+
+		global $wpdb;
+		$submission = $wpdb->get_row(
+			"SELECT * FROM {$wpdb->prefix}litesurveys_submissions ORDER BY id DESC LIMIT 1"
+		);
+		
+		$this->assertEquals('/test-page', $submission->page);
 	}
 
 	public function test_sanitize_json_data() {
