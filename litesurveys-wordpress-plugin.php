@@ -133,7 +133,7 @@ class LSAPP_LiteSurveys {
 	 */
 	private function create_database_tables($charset_collate) {
 		global $wpdb;
-		
+
 		// Create surveys table
 		$sql_surveys = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}litesurveys_surveys (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -289,7 +289,7 @@ class LSAPP_LiteSurveys {
 
 				// Get submissions with responses
 				$submissions = $wpdb->get_results($wpdb->prepare(
-					"SELECT s.created_at, s.page, r.content as response
+					"SELECT s.id, s.created_at, s.page, r.content as response
 					FROM {$wpdb->prefix}litesurveys_submissions s
 					LEFT JOIN {$wpdb->prefix}litesurveys_responses r ON s.id = r.submission_id
 					WHERE s.survey_id = %d AND s.deleted_at IS NULL
@@ -297,6 +297,7 @@ class LSAPP_LiteSurveys {
 					LIMIT %d OFFSET %d",
 					$survey_id, $per_page, $offset
 				));
+
 
 				// Calculate pagination values
 				$total_pages = ceil($total_items / $per_page);
