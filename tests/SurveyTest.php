@@ -3,9 +3,14 @@ class SurveyTest extends WP_UnitTestCase {
 	private $plugin;
 
 	public function setUp(): void {
-		parent::setUp();
-		$this->plugin = LSAPP_LiteSurveys::get_instance();
-	}
+        parent::setUp();
+        
+        // Get plugin instance
+        $this->plugin = LSAPP_LiteSurveys::get_instance();
+        
+        // Make sure we're running as admin for tests
+        wp_set_current_user(1); // ID 1 is the admin user created in bootstrap
+    }
 
 	public function test_create_survey() {
 		// Set up test data
@@ -13,7 +18,7 @@ class SurveyTest extends WP_UnitTestCase {
 			'survey_name' => 'Test Survey',
 			'question_type' => 'multiple-choice',
 			'question_content' => 'Test Question',
-			'answers' => ['Answer 1', 'Answer 2'],
+			'answers' => array( 'Answer 1', 'Answer 2' ),
 			'submit_message' => 'Thank you!',
 			'targeting_show' => 'all',
 			'trigger_type' => 'auto',
@@ -24,7 +29,7 @@ class SurveyTest extends WP_UnitTestCase {
 
 		// Simulate form submission
 		$_POST = $survey_data;
-		$_POST['survey_nonce'] = wp_create_nonce('save_survey');
+		$_POST['survey_nonce'] = wp_create_nonce( 'save_survey' );
 		$_POST['action'] = 'save_survey';
 
 		// Call the handler
@@ -37,9 +42,9 @@ class SurveyTest extends WP_UnitTestCase {
 		);
 
 		// Assert survey was created correctly
-		$this->assertNotNull($survey);
-		$this->assertEquals('Test Survey', $survey->name);
-		$this->assertEquals(1, $survey->active);
+		$this->assertNotNull( $survey );
+		$this->assertEquals( 'Test Survey', $survey->name );
+		$this->assertEquals( 1, $survey->active );
 
 		// Get the associated question
 		$question = $wpdb->get_row(
@@ -50,21 +55,21 @@ class SurveyTest extends WP_UnitTestCase {
 		);
 
 		// Assert question was created correctly
-		$this->assertNotNull($question);
-		$this->assertEquals('Test Question', $question->content);
-		$this->assertEquals('multiple-choice', $question->type);
+		$this->assertNotNull( $question );
+		$this->assertEquals( 'Test Question', $question->content );
+		$this->assertEquals( 'multiple-choice', $question->type );
 		
 		// Check answers were stored correctly
-		$answers = json_decode($question->answers);
-		$this->assertCount(2, $answers);
-		$this->assertEquals('Answer 1', $answers[0]);
-		$this->assertEquals('Answer 2', $answers[1]);
+		$answers = json_decode( $question->answers );
+		$this->assertCount( 2, $answers );
+		$this->assertEquals( 'Answer 1', $answers[0] );
+		$this->assertEquals( 'Answer 2', $answers[1] );
 	}
 
 	public function test_sanitize_json_data() {
-		$reflection = new ReflectionClass($this->plugin);
-		$method = $reflection->getMethod('sanitize_json_data');
-		$method->setAccessible(true);
+		$reflection = new ReflectionClass( $this->plugin );
+		$method = $reflection->getMethod( 'sanitize_json_data' );
+		$method->setAccessible( true );
 
 		// Test with valid data
 		$input = array(
@@ -77,14 +82,15 @@ class SurveyTest extends WP_UnitTestCase {
 			)
 		);
 
-		$json = $method->invoke($this->plugin, $input);
-		$output = json_decode($json, true);
+		$json = $method->invoke( $this->plugin, $input );
+		$output = json_decode( $json, true );
 
-		$this->assertEquals('Test String alert("xss")', $output['string']);
-		$this->assertEquals(42, $output['int']);
-		$this->assertEquals(3.14, $output['float']);
-		$this->assertTrue($output['bool']);
-		$this->assertEquals('value alert("xss")', $output['nested']['key']);
+		// Updated expectation to match new sanitization
+		$this->assertEquals( 'Test String', $output['string'] );
+		$this->assertEquals( 42, $output['int'] );
+		$this->assertEquals( 3.14, $output['float'] );
+		$this->assertTrue( $output['bool'] );
+		$this->assertEquals( 'value', $output['nested']['key'] );
 	}
 
 	public function test_get_active_surveys() {
@@ -92,21 +98,24 @@ class SurveyTest extends WP_UnitTestCase {
 		$survey_id = $this->create_test_survey();
 
 		// Create WP_REST_Request mock
-		$request = new WP_REST_Request('GET', '/litesurveys/v1/surveys');
+		$request = new WP_REST_Request( 'GET', '/litesurveys/v1/surveys' );
+
+		// Get REST API instance from plugin
+		$rest_api = $this->plugin->get_rest_api();
 
 		// Get response
-		$response = $this->plugin->get_active_surveys($request);
+		$response = $rest_api->get_active_surveys( $request );
 		$data = $response->get_data();
 
 		// Assert response structure
-		$this->assertIsArray($data);
-		$this->assertNotEmpty($data);
+		$this->assertIsArray( $data );
+		$this->assertNotEmpty( $data );
 		
 		$survey = $data[0];
-		$this->assertArrayHasKey('id', $survey);
-		$this->assertArrayHasKey('name', $survey);
-		$this->assertArrayHasKey('questions', $survey);
-		$this->assertTrue($survey['active']);
+		$this->assertArrayHasKey( 'id', $survey );
+		$this->assertArrayHasKey( 'name', $survey );
+		$this->assertArrayHasKey( 'questions', $survey );
+		$this->assertTrue( $survey['active'] );
 	}
 
 	private function create_test_survey() {
@@ -119,8 +128,8 @@ class SurveyTest extends WP_UnitTestCase {
 				'name' => 'Test Survey',
 				'active' => 1,
 				'submit_message' => 'Thank you!',
-				'targeting_settings' => json_encode(array('show' => 'all')),
-				'appearance_settings' => json_encode(array('position' => 'right'))
+				'targeting_settings' => json_encode( array( 'show' => 'all' ) ),
+				'appearance_settings' => json_encode( array( 'position' => 'right' ) )
 			)
 		);
 
@@ -133,7 +142,7 @@ class SurveyTest extends WP_UnitTestCase {
 				'survey_id' => $survey_id,
 				'type' => 'multiple-choice',
 				'content' => 'Test Question',
-				'answers' => json_encode(['Answer 1', 'Answer 2'])
+				'answers' => json_encode( array( 'Answer 1', 'Answer 2' ) )
 			)
 		);
 

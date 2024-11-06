@@ -840,6 +840,16 @@ class LSAPP_LiteSurveys {
 	}
 
 	/**
+	 * Get the REST API instance.
+	 *
+	 * @since 2.0.0
+	 * @return LSAPP_REST_API The REST API instance.
+	 */
+	public function get_rest_api() {
+		return $this->rest_api;
+	}
+
+	/**
 	 * Check if there are any active surveys.
 	 *
 	 * @return bool True if there are active surveys, false otherwise.

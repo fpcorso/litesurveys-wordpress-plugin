@@ -9,22 +9,31 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 $_tests_dir = getenv('WP_TESTS_DIR');
 
 if (!$_tests_dir) {
-	$_tests_dir = rtrim(sys_get_temp_dir(), '/\\') . '/wordpress-tests-lib';
+    $_tests_dir = rtrim(sys_get_temp_dir(), '/\\') . '/wordpress-tests-lib';
 }
 
 if (!file_exists($_tests_dir . '/includes/functions.php')) {
-	echo "Could not find $_tests_dir/includes/functions.php\n";
-	exit(1);
+    echo "Could not find $_tests_dir/includes/functions.php\n";
+    exit(1);
 }
 
 // Give access to tests_add_filter() function
 require_once $_tests_dir . '/includes/functions.php';
 
 /**
- * Manually load the plugin being tested.
+ * Manually load and activate our plugin
  */
 function _manually_load_plugin() {
-	require dirname(__DIR__) . '/litesurveys-wordpress-plugin.php';
+    require dirname(__DIR__) . '/litesurveys-wordpress-plugin.php';
+
+    // Create admin user
+    $admin_id = wp_create_user('admin', 'password', 'admin@example.com');
+    $user = new WP_User($admin_id);
+    $user->set_role('administrator');
+
+    // Activate plugin
+    $plugin = LSAPP_LiteSurveys::get_instance();
+    $plugin->activate_plugin();
 }
 tests_add_filter('muplugins_loaded', '_manually_load_plugin');
 
