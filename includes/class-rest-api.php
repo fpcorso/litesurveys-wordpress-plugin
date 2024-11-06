@@ -66,61 +66,70 @@ class LSAPP_REST_API {
 	 */
 	public function get_active_surveys( $request ) {
 		$cache_key = 'litesurveys_active_surveys';
-		$surveys   = get_transient( $cache_key );
+		$formatted_surveys = get_transient( $cache_key );
 
-		if ( false !== $surveys ) {
-			return new WP_REST_Response( $surveys, 200 );
-		}
-		global $wpdb;
+		if ( false === $formatted_surveys ) {
+			global $wpdb;
 
-		$surveys = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT s.*, 
-						q.id as question_id, 
-						q.type as question_type, 
-						q.content as question_content,
-						q.answers as question_answers
-				FROM {$wpdb->prefix}litesurveys_surveys s
-				LEFT JOIN {$wpdb->prefix}litesurveys_questions q ON s.id = q.survey_id
-				WHERE s.active = %d 
-				AND s.deleted_at IS NULL 
-				AND q.deleted_at IS NULL
-				ORDER BY s.created_at DESC",
-				1
-			)
-		);
+			$surveys = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT s.*, 
+							q.id as question_id, 
+							q.type as question_type, 
+							q.content as question_content,
+							q.answers as question_answers
+					FROM {$wpdb->prefix}litesurveys_surveys s
+					LEFT JOIN {$wpdb->prefix}litesurveys_questions q ON s.id = q.survey_id
+					WHERE s.active = %d 
+					AND s.deleted_at IS NULL 
+					AND q.deleted_at IS NULL
+					ORDER BY s.created_at DESC",
+					1
+				)
+			);
 
-		if ( empty( $surveys ) ) {
-			return new WP_REST_Response( array(), 200 );
-		}
+			if ( empty( $surveys ) ) {
+				return new WP_REST_Response( array(), 200 );
+			}
 
-		// Safely encode response data.
-		$response = array_map(
-			function( $survey ) {
-				return array(
-					'id'                 => (int) $survey->id,
-					'name'               => sanitize_text_field( $survey->name ),
-					'active'             => (bool) $survey->active,
-					'submit_message'     => wp_kses_post( $survey->submit_message ),
-					'targeting_settings' => json_decode( $survey->targeting_settings ),
-					'appearance_settings' => json_decode( $survey->appearance_settings ),
-					'questions'          => array(
-						array(
-							'id'      => (int) $survey->question_id,
-							'type'    => sanitize_text_field( $survey->question_type ),
-							'content' => wp_kses_post( $survey->question_content ),
-							'answers' => json_decode( $survey->question_answers ),
+			// Format the response data
+			$formatted_surveys = array_map(
+				function( $survey ) {
+					// Decode JSON fields
+					$targeting_settings = json_decode( $survey->targeting_settings );
+					$appearance_settings = json_decode( $survey->appearance_settings );
+					$answers = json_decode( $survey->question_answers );
+
+					// Handle case where json_decode returns null
+					$targeting_settings = $targeting_settings ? $targeting_settings : new stdClass();
+					$appearance_settings = $appearance_settings ? $appearance_settings : new stdClass();
+					$answers = $answers ? $answers : array();
+
+					return array(
+						'id' => (int) $survey->id,
+						'name' => sanitize_text_field( $survey->name ),
+						'active' => (bool) $survey->active,
+						'submit_message' => wp_kses_post( $survey->submit_message ),
+						'targeting_settings' => $targeting_settings,
+						'appearance_settings' => $appearance_settings,
+						'questions' => array(
+							array(
+								'id' => (int) $survey->question_id,
+								'type' => sanitize_text_field( $survey->question_type ),
+								'content' => wp_kses_post( $survey->question_content ),
+								'answers' => $answers,
+							),
 						),
-					),
-				);
-			},
-			$surveys
-		);
+					);
+				},
+				$surveys
+			);
 
-		// Cache the formatted data.
-		set_transient( $cache_key, $response, LSAPP_LiteSurveys::CACHE_TIME );
+			// Cache the formatted surveys
+			set_transient( $cache_key, $formatted_surveys, LSAPP_LiteSurveys::CACHE_TIME );
+		}
 
-		return new WP_REST_Response( $response, 200 );
+		return new WP_REST_Response( $formatted_surveys, 200 );
 	}
 
 	/**
