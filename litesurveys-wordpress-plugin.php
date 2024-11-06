@@ -42,6 +42,7 @@ class LSAPP_LiteSurveys {
 		add_action('admin_menu', array($this, 'addAdminMenu'));
 		add_action('admin_post_save_survey', array($this, 'handleSaveSurvey'));
 		add_action('admin_post_delete_survey', array($this, 'handleDeleteSurvey'));
+		add_action('admin_post_delete_submission', array($this, 'handleDeleteSubmission'));
 		add_action('admin_notices', array($this, 'displayAdminNotices'));
 		add_action('admin_enqueue_scripts', array($this, 'enqueueAdminAssets'));
 		add_filter('plugin_action_links', array($this, 'plugin_action_links'), 10, 2);
@@ -492,6 +493,86 @@ class LSAPP_LiteSurveys {
 		}
 	}
 
+	public function handleDeleteSubmission() {
+		if (!current_user_can('manage_options')) {
+			wp_die(__('You do not have sufficient permissions to access this page.', 'litesurveys'));
+		}
+	
+		// Verify nonce
+		$nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field($_REQUEST['_wpnonce']) : '';
+		$submission_id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
+		$survey_id = isset($_REQUEST['survey_id']) ? intval($_REQUEST['survey_id']) : 0;
+	
+		if (!wp_verify_nonce($nonce, 'delete-submission_' . $submission_id)) {
+			wp_die(__('Security check failed.', 'litesurveys'));
+		}
+	
+		if (!$submission_id || !$survey_id) {
+			wp_die(__('Invalid submission ID.', 'litesurveys'));
+		}
+	
+		global $wpdb;
+	
+		try {
+			// Start transaction
+			$wpdb->query('START TRANSACTION');
+	
+			// Soft delete the submission
+			$result = $wpdb->update(
+				$wpdb->prefix . 'litesurveys_submissions',
+				array('deleted_at' => current_time('mysql')),
+				array('id' => $submission_id),
+				array('%s'),
+				array('%d')
+			);
+	
+			if ($result === false) {
+				throw new Exception(__('Failed to delete submission.', 'litesurveys'));
+			}
+	
+			// Soft delete associated responses
+			$wpdb->update(
+				$wpdb->prefix . 'litesurveys_responses',
+				array('deleted_at' => current_time('mysql')),
+				array('submission_id' => $submission_id),
+				array('%s'),
+				array('%d')
+			);
+	
+			// Commit transaction
+			$wpdb->query('COMMIT');
+	
+			// Redirect with success message
+			wp_safe_redirect(add_query_arg(
+				array(
+					'page' => 'LSAPP_litesurveys',
+					'action' => 'view-responses',
+					'id' => $survey_id,
+					'message' => 'submission-deleted'
+				),
+				admin_url('admin.php')
+			));
+			exit;
+	
+		} catch (Exception $e) {
+			// Rollback transaction
+			$wpdb->query('ROLLBACK');
+	
+			// Redirect with error message
+			wp_safe_redirect(add_query_arg(
+				array(
+					'page' => 'LSAPP_litesurveys',
+					'action' => 'view-responses',
+					'id' => $survey_id,
+					'message' => 'error',
+					'error' => urlencode($e->getMessage())
+				),
+				admin_url('admin.php')
+			));
+			exit;
+		}
+	}
+	
 	public function displayAdminNotices() {
 		if (!isset($_GET['page']) || $_GET['page'] !== 'LSAPP_litesurveys') {
 			return;

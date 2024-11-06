@@ -75,6 +75,22 @@ if (!current_user_can('manage_options')) {
 									strtotime($submission->created_at)
 								)
 							); ?>
+							<div class="row-actions">
+								<span class="trash">
+									<a href="<?php echo wp_nonce_url(
+										admin_url(sprintf(
+											'admin-post.php?action=delete_submission&id=%d&survey_id=%d',
+											$submission->id,
+											$survey_id
+										)),
+										'delete-submission_' . $submission->id
+									); ?>" 
+									class="submitdelete" 
+									onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete this submission?', 'litesurveys'); ?>');">
+										<?php _e('Delete', 'litesurveys'); ?>
+									</a>
+								</span>
+							</div>
 						</td>
 						<td><?php echo esc_html($submission->response); ?></td>
 						<td><?php echo esc_html($submission->page); ?></td>
