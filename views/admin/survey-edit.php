@@ -122,55 +122,17 @@ if (!current_user_can('manage_options')) {
 									<td>
 										<fieldset>
 											<label>
-												<input type="radio" name="targeting_show" value="all"
-													<?php checked($survey->targeting_settings->targets->show, 'all'); ?>>
-												All pages
-											</label><br>
-											<label>
-												<input type="radio" name="targeting_show" value="only_on"
-													<?php checked($survey->targeting_settings->targets->show, 'only_on'); ?>>
-												Only specific pages
-											</label><br>
-											<label>
-												<input type="radio" name="targeting_show" value="all_except"
-													<?php checked($survey->targeting_settings->targets->show, 'all_except'); ?>>
-												All pages except specific pages
+												<input type="radio" name="targeting_show" value="all" checked disabled>
+												... all pages
 											</label>
+											<input type="hidden" name="targeting_show" value="all">
+											<p class="description" style="margin-top: 10px;">
+												<?php printf(
+													__('More targeting options coming soon! Want to show your survey on specific pages? <a href="%s" target="_blank">Let us know</a> what targeting options would be most useful for you.', 'litesurveys'),
+													'https://litesurveys.com/contact.html'
+												); ?>
+											</p>
 										</fieldset>
-									</td>
-								</tr>
-								<tr class="target-pages" id="include-pages" 
-									style="<?php echo $survey->targeting_settings->targets->show !== 'only_on' ? 'display:none' : ''; ?>">
-									<th scope="row">Include Pages</th>
-									<td>
-										<div id="include-pages-list">
-											<?php foreach ($survey->targeting_settings->targets->includes as $page) : ?>
-												<div class="target-page">
-													<input type="text" name="includes[]" 
-														   value="<?php echo esc_attr($page); ?>" 
-														   class="regular-text">
-													<button type="button" class="button remove-page">Remove</button>
-												</div>
-											<?php endforeach; ?>
-										</div>
-										<button type="button" class="button add-include-page">Add Page</button>
-									</td>
-								</tr>
-								<tr class="target-pages" id="exclude-pages" 
-									style="<?php echo $survey->targeting_settings->targets->show !== 'all_except' ? 'display:none' : ''; ?>">
-									<th scope="row">Exclude Pages</th>
-									<td>
-										<div id="exclude-pages-list">
-											<?php foreach ($survey->targeting_settings->targets->excludes as $page) : ?>
-												<div class="target-page">
-													<input type="text" name="excludes[]" 
-														   value="<?php echo esc_attr($page); ?>" 
-														   class="regular-text">
-													<button type="button" class="button remove-page">Remove</button>
-												</div>
-											<?php endforeach; ?>
-										</div>
-										<button type="button" class="button add-exclude-page">Add Page</button>
 									</td>
 								</tr>
 							</table>
@@ -203,18 +165,19 @@ if (!current_user_can('manage_options')) {
 									<td>
 										<fieldset>
 											<label>
-												<input type="radio" name="trigger_type" value="auto"
-													<?php checked($survey->targeting_settings->trigger[0]->type, 'auto'); ?>>
-												A user has been on the page for at least 
+												<input type="radio" name="trigger_type" value="auto" checked disabled>
+												... a user has been on the page for at least 
 												<input type="number" name="auto_timing" 
-													   value="<?php echo esc_attr($survey->targeting_settings->trigger[0]->auto_timing); ?>"
-													   min="0" step="1" style="width: 60px;"> seconds
-											</label><br>
-											<label>
-												<input type="radio" name="trigger_type" value="exit"
-													<?php checked($survey->targeting_settings->trigger[0]->type, 'exit'); ?>>
-												A user is about to leave the site
+													value="<?php echo esc_attr($survey->targeting_settings->trigger[0]->auto_timing); ?>"
+													min="0" step="1" style="width: 60px;"> seconds
 											</label>
+											<input type="hidden" name="trigger_type" value="auto">
+											<p class="description" style="margin-top: 10px;">
+												<?php printf(
+													__('More trigger options coming soon! Want to show your survey on exit intent or scroll? <a href="%s" target="_blank">Let us know</a> what trigger options would help you collect better feedback.', 'litesurveys'),
+													'https://litesurveys.com/contact.html'
+												); ?>
+											</p>
 										</fieldset>
 									</td>
 								</tr>
