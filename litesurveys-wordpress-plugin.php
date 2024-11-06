@@ -89,7 +89,12 @@ class LSAPP_LiteSurveys {
 	 * Initialize WordPress hooks.
 	 */
 	private function init_hooks() {
+
+		// Setting up plugin upon activation
 		register_activation_hook(__FILE__, array($this, 'activatePlugin'));
+
+		// Load translations
+		add_action('init', array($this, 'load_textdomain'));
 		
 		// Add Admin code
 		add_action('admin_menu', array($this, 'addAdminMenu'));
@@ -186,6 +191,9 @@ class LSAPP_LiteSurveys {
 		dbDelta($sql_responses);
 	}
 
+	/**
+	 * Load plugin text domain for translations.
+	 */
 	public function load_textdomain() {
 		load_plugin_textdomain(
 			'litesurveys',
