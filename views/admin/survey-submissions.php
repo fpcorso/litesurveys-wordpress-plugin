@@ -30,20 +30,30 @@ if (!current_user_can('manage_options')) {
 						number_format_i18n($total_items)
 					); ?>
 				</span>
-				<?php if ($total_pages > 1) : ?>
-					<span class="pagination-links">
-						<?php
-						echo paginate_links(array(
-							'base' => add_query_arg('paged', '%#%'),
-							'format' => '',
-							'prev_text' => '&lsaquo;',
-							'next_text' => '&rsaquo;',
-							'total' => $total_pages,
-							'current' => $current_page
-						));
-						?>
-					</span>
-				<?php endif; ?>
+				<?php if ($total_pages > 1) : 
+					$page_links = paginate_links(array(
+						'base' => add_query_arg('paged', '%#%'),
+						'format' => '',
+						'prev_text' => __('&laquo;'),
+						'next_text' => __('&raquo;'),
+						'total' => $total_pages,
+						'current' => $current_page,
+						'type' => 'array'
+					));
+					
+					if ($page_links) : ?>
+						<span class="pagination-links">
+							<?php echo join("\n", array_map(function($link) {
+								// Add button class to maintain WordPress admin styling
+								return str_replace(
+									array('<a ', 'current'),
+									array('<a class="button" ', 'button-primary current'),
+									$link
+								);
+							}, $page_links)); ?>
+						</span>
+					<?php endif; 
+				endif; ?>
 			</div>
 		</div>
 
@@ -73,23 +83,35 @@ if (!current_user_can('manage_options')) {
 			</tbody>
 		</table>
 
-		<div class="tablenav bottom">
-			<div class="tablenav-pages">
-				<?php if ($total_pages > 1) : ?>
-					<span class="pagination-links">
-						<?php
-						echo paginate_links(array(
+		<?php if ($total_pages > 1) : ?>
+			<div class="tablenav bottom">
+				<div class="tablenav-pages">
+					<?php if ($total_pages > 1) : 
+						$page_links = paginate_links(array(
 							'base' => add_query_arg('paged', '%#%'),
 							'format' => '',
-							'prev_text' => '&lsaquo;',
-							'next_text' => '&rsaquo;',
+							'prev_text' => __('&laquo;'),
+							'next_text' => __('&raquo;'),
 							'total' => $total_pages,
-							'current' => $current_page
+							'current' => $current_page,
+							'type' => 'array'
 						));
-						?>
-					</span>
-				<?php endif; ?>
+						
+						if ($page_links) : ?>
+							<span class="pagination-links">
+								<?php echo join("\n", array_map(function($link) {
+									// Add button class to maintain WordPress admin styling
+									return str_replace(
+										array('<a ', 'current'),
+										array('<a class="button" ', 'button-primary current'),
+										$link
+									);
+								}, $page_links)); ?>
+							</span>
+						<?php endif; 
+					endif; ?>
+				</div>
 			</div>
-		</div>
+		<?php endif; ?>
 	<?php endif; ?>
 </div>
