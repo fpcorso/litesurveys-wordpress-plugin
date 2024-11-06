@@ -11,9 +11,13 @@ on:
 jobs:
   minify:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -32,3 +36,6 @@ jobs:
         with:
           commit_message: "chore: minify assets"
           file_pattern: 'resources/**/*.min.js resources/**/*.min.css'
+          commit_user_name: "GitHub Action"
+          commit_user_email: "actions@github.com"
+          commit_author: "GitHub Action <actions@github.com>"
