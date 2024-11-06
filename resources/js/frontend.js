@@ -38,8 +38,7 @@ const liteSurveys = {
 		openAnswer: `
 			<textarea class="litesurveys-slidein-content-textarea" 
 				aria-label="<?php esc_attr_e('Your answer', 'litesurveys'); ?>"
-				rows="4">
-			</textarea>
+				rows="4"></textarea>
 		`,
 		submitButton: `<button class="litesurveys-slidein-content-button">Submit</button>`
 	},

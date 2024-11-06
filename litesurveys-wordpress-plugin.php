@@ -921,5 +921,5 @@ class LSAPP_LiteSurveys {
 }
 
 // Initialize plugin
-LSAPP_LiteSurveys::getInstance();
+LSAPP_LiteSurveys::get_instance();
 ?>

@@ -71,7 +71,7 @@ if (!current_user_can('manage_options')) {
 						<td>
 							<?php
 							$response_count = $wpdb->get_var($wpdb->prepare(
-								"SELECT COUNT(*) FROM {$wpdb->prefix}litesurveys_submissions WHERE survey_id = %d",
+								"SELECT COUNT(*) FROM {$wpdb->prefix}litesurveys_submissions WHERE survey_id = %d AND deleted_at IS NULL",
 								$survey->id
 							));
 							echo esc_html($response_count);
