@@ -132,6 +132,8 @@ class LSAPP_LiteSurveys {
 	 * @param string $charset_collate Database charset and collation.
 	 */
 	private function create_database_tables($charset_collate) {
+		global $wpdb;
+		
 		// Create surveys table
 		$sql_surveys = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}litesurveys_surveys (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -880,7 +882,7 @@ class LSAPP_LiteSurveys {
 			// Process submission with validated data
 			$wpdb->query('START TRANSACTION');
 			
-			$page_path = $this->get_path_from_url(esc_url_raw($body['page']);
+			$page_path = $this->get_path_from_url(esc_url_raw($body['page']));
 			$wpdb->insert(
 				$wpdb->prefix . 'litesurveys_submissions',
 				array(
