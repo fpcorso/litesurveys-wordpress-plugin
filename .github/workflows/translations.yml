@@ -20,6 +20,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -38,3 +40,7 @@ jobs:
         with:
           commit_message: "chore: update translation files"
           file_pattern: 'languages/*'
+          commit_user_name: "GitHub Action"
+          commit_user_email: "actions@github.com"
+          commit_author: "GitHub Action <actions@github.com>"
+          token: ${{ secrets.GITHUB_TOKEN }}
