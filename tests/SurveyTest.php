@@ -2,15 +2,33 @@
 class SurveyTest extends WP_UnitTestCase {
 	private $plugin;
 
+	private static $admin_id;
+
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		
+		// Create an admin user once for all tests
+		self::$admin_id = self::factory()->user->create(array(
+			'role' => 'administrator'
+		));
+	}
+
 	public function setUp(): void {
-        parent::setUp();
-        
-        // Get plugin instance
-        $this->plugin = LSAPP_LiteSurveys::get_instance();
-        
-        // Make sure we're running as admin for tests
-        wp_set_current_user(1); // ID 1 is the admin user created in bootstrap
-    }
+		parent::setUp();
+		
+		// Get plugin instance
+		$this->plugin = LSAPP_LiteSurveys::get_instance();
+		
+		// Set current user to admin for each test
+		wp_set_current_user(self::$admin_id);
+	}
+
+	public static function tearDownAfterClass(): void {
+		if (self::$admin_id) {
+			wp_delete_user(self::$admin_id);
+		}
+		parent::tearDownAfterClass();
+	}
 
 	public function test_create_survey() {
 		// Set up test data
