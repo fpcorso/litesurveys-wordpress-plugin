@@ -2,21 +2,45 @@ const liteSurveys = {
 	surveys: [],
 	templates: {
 		modal: `
-			<div class="litesurveys-slidein" data-survey-id="" tabindex="-1" role="dialog">
-				<button class="litesurveys-slidein-close" aria-label="Close"></button>
+			<div class="litesurveys-slidein" data-survey-id="" 
+				role="dialog" 
+				aria-labelledby="survey-title-{{id}}"
+				aria-describedby="survey-question-{{id}}"
+				tabindex="-1">
+				<button class="litesurveys-slidein-close" 
+						aria-label="<?php esc_attr_e('Close survey', 'litesurveys'); ?>">
+				</button>
 				<div class="litesurveys-slidein-content">
+					<h2 id="survey-title-{{id}}" class="screen-reader-text">
+						<?php esc_html_e('Quick Survey', 'litesurveys'); ?>
+					</h2>
 					<div class="litesurveys-slidein-content-form">
 						<div class="litesurveys-slide-content-field">
-							<label class="litesurveys-slide-content-label"></label>
-							<div class="litesurveys-slide-content-control"></div>
+							<label class="litesurveys-slide-content-label" 
+								id="survey-question-{{id}}">
+							</label>
+							<div class="litesurveys-slide-content-control" 
+								role="group" 
+								aria-labelledby="survey-question-{{id}}">
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		`,
-		answerButton: `<button class="litesurveys-answer-button"></button>`,
-		openAnswer: `<textarea class="litesurveys-slidein-content-textarea"></textarea>`,
-		submitButton: `<button class="litesurveys-slidein-content-button">Submit</button>`
+		answerButton: `
+			<button class="litesurveys-answer-button" 
+				type="button" 
+				role="radio" 
+				aria-checked="false">
+			</button>
+		`,
+		openAnswer: `
+			<textarea class="litesurveys-slidein-content-textarea" 
+				aria-label="<?php esc_attr_e('Your answer', 'litesurveys'); ?>"
+				rows="4">
+			</textarea>
+		`
 	},
 
 	init() {
