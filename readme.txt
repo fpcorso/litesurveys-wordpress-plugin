@@ -3,7 +3,7 @@ Contributors: fpcorso
 Tags: surveys, polls, integration, marketing
 Requires at least: 6.0
 Tested up to: 6.6.1
-Stable tag: 1.0.3
+Stable tag: 2.0.0
 Requires PHP: 8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -12,28 +12,34 @@ Learn from your site visitors using quick surveys.
 
 == Description ==
 
-Easily hear from your users by adding pre-sale surveys, post-sale surveys, feedback surveys, and more to your website by integrating your site with [the LiteSurveys service](https://litesurveys.com/).
+Learn from your site visitors using quick surveys.
 
-**Important Note**: This plugin requires a [LiteSurveys](https://litesurveys.com) plan to create surveys and collect responses. Get started for free today!
+== Description ==
 
-## Collect Feedback and Ideas From Your Site Visitors
+LiteSurveys is a lightweight WordPress plugin that helps you gather feedback from your website visitors through simple, unobtrusive surveys. With LiteSurveys, you can easily create and manage single-question surveys that appear as slide-in popups on your website.
 
-You can use LiteSurveys to:
+## Key Features
 
-* **Conduct User Research** - Using LiteSurveys small slide-in surveys, users can quickly provide information about who they are or what they are looking for.
-* **Identify Pain Points** - Adding in quick surveys during the sales funnel allows site visitors to provide feedback about concerns and issues.
-* **Get Marketing Insights** - Using surveys at key points during the user experience can provide details about the user’s decisions and thoughts which can influence your copy and strategy for your marketing efforts.
-* And much more!
+* **Simple Survey Creation** - Create surveys directly in your WordPress admin with just a few clicks
+* **Multiple Question Types** - Choose between multiple choice or open-ended questions
+* **Customizable Display** - Control when and where your surveys appear
+* **Easy Response Management** - View and manage survey responses right in your WordPress dashboard
+* **Unobtrusive Design** - Surveys appear as subtle slide-in popups that won't disrupt the user experience
+* **Mobile Friendly** - Surveys work great on all devices
+
+## Use LiteSurveys to:
+
+* **Conduct User Research** - Using small slide-in surveys, users can quickly provide information about who they are or what they are looking for
+* **Identify Pain Points** - Adding quick surveys during the sales funnel allows site visitors to provide feedback about concerns and issues
+* **Get Marketing Insights** - Using surveys at key points during the user experience can provide details about the user's decisions and thoughts which can influence your copy and strategy
+* **Gather Customer Feedback** - Collect real feedback from actual users about their experience with your site or product
 
 ## Some Features of LiteSurveys:
 
-* **Question Type Variety** - Select from a variety question types including multiple choice, open answer, and more.
-* **Analyze Results** - Easily see how individual site visitors respond but also analyze how all site visitors are responding.
-* **Control Timing** - LiteSurveys has many options available for controlling when the survey appears.
-* **Target Specific Pages** - Show your survey on your whole website or only on specific pages.
-* **Export Results** - Export your survey responses so you can use them in spreadsheets, databases, other tools, and more.
-
-Ready to get started? [Create your account](https://litesurveys.com/) for free to create your first survey within minutes!
+* **Question Type Variety** - Select from multiple choice or open-ended questions to best suit your needs
+* **Timing Control** - Set when your survey should appear to visitors
+* **Position Control** - Choose whether your survey appears in the bottom left or bottom right
+* **Active/Inactive States** - Easily activate or deactivate surveys as needed
 
 == Installation ==
 1. Log into WordPress
@@ -49,6 +55,13 @@ Ready to get started? [Create your account](https://litesurveys.com/) for free t
 2. The settings page within the WordPress plugin.
 
 == Changelog ==
+
+= 2.0.0 (November 6, 2024) =
+
+* Major rewrite of plugin to be standalone instead of requiring LiteSurveys service
+* Add ability to create and manage surveys directly in WordPress admin
+* Add support for multiple choice and open-ended questions
+* Add support for customizing survey timing and position
 
 = 1.0.3 (August 2, 2024) =
 * Minor copy tweaks
