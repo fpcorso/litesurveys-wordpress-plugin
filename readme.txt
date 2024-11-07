@@ -47,8 +47,7 @@ LiteSurveys is a lightweight WordPress plugin that helps you gather feedback fro
 2. Go to `Plugins`, `Add New`
 3. Search for `LiteSurveys`
 4. Click `Install Now`, then `Activate`
-5. Go to `Settings`, then `LiteSurveys`
-6. Type in your website ID. If you don’t know your website ID, log into LiteSurveys, go to `Connect Website`, then your website ID will be listed at the top of the page.
+5. Go to `LiteSurveys` menu to create your surveys
 
 == Screenshots ==
 
