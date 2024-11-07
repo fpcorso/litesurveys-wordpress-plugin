@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-11-06T23:09:53+00:00\n"
+"POT-Creation-Date: 2024-11-07T00:32:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: litesurveys\n"
@@ -113,7 +113,11 @@ msgstr ""
 msgid "An error occurred while processing your request."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:871
+#: litesurveys-wordpress-plugin.php:837
+msgid "Surveys"
+msgstr ""
+
+#: litesurveys-wordpress-plugin.php:882
 #: views/admin/survey-edit.php:5
 #: views/admin/survey-submissions.php:5
 #: views/admin/surveys-admin.php:5
