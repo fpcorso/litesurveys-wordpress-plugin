@@ -1,55 +1,82 @@
 # LiteSurveys WordPress Plugin
 
-This plugin connects your [LiteSurveys](https://litesurveys.com) account to your WordPress site. It allows you to easily embed surveys into your site and collect responses.
+Add simple one-question surveys to your WordPress site to gather feedback from your visitors. LiteSurveys is a lightweight plugin that helps you create unobtrusive slide-in surveys that appear at the perfect moment.
 
-**Important Note**: This plugin requires a LiteSurveys plan to create surveys and collect responses. Get started for free today!.
+## Installation
 
-## Getting Started
+The ideal method is to use the WordPress Plugin Repository to install directly into your WordPress site.
 
-We do not currently use any build scripts. This repo can be downloaded as a zip and installed as-is as a WordPress plugin.
+However, you can also manually install from this GitHub repo using the following steps:
 
-Once installed, there will be a new **LiteSurveys** page added to the Settings menu where you can add your website ID from your LiteSurveys account.
+1. Download the latest release from the [releases page](https://github.com/fpcorso/litesurveys-wordpress-plugin/releases)
+2. Go to your WordPress admin panel
+3. Navigate to Plugins > Add New
+4. Click "Upload Plugin" and select the downloaded zip file
+5. Click "Install Now" and then "Activate"
+6. Go to LiteSurveys in your WordPress admin menu to create your first survey
+
+## Development Setup
+
+1. Clone this repository
+2. Install PHP dependencies: `composer install`
+3. Install Node dependencies: `npm install`
+4. Run tests: `composer test`
+5. Build assets: `npm run build`
+
+### Requirements
+
+- PHP 8.0 or higher
+- WordPress 6.1 or higher
+- Node.js 20.x (for development)
+- Composer (for development)
 
 ## Contributing
 
-Community made feature requests, patches, localizations, bug reports and contributions are always welcome.
-
-When contributing please ensure you follow the guidelines below so that we can keep on top of things.
+Community made feature requests, patches, localizations, bug reports, and contributions are always welcome.
 
 ### Creating Issues
 
-* If you have any bugs or feature requests for the plugin itself, please [create an issue](https://github.com/fpcorso/litesurveys-wordpress-plugin/issues/new)
-* For bug reports, please clearly describe the bug/issue and include steps on how to reproduce it
+* Please [create issues](https://github.com/fpcorso/litesurveys-wordpress-plugin/issues/new) for bugs or feature requests
+* For bug reports, please clearly describe the bug/issue and include steps to reproduce
 * For feature requests, please clearly describe what you would like, how it would be used, and example screenshots (if possible)
-
-**Note:** This is only for issues related to the plugin itself. If you have issues or feature requests with your LiteSurveys account, please [reach out to our team here](https://litesurveys.com/).
 
 ### Pull Requests
 
-* Ensure you stick to the [WordPress Coding Standards](https://codex.wordpress.org/WordPress_Coding_Standards).
-* When committing, reference your issue (if present) and include a note about the fix.
-* Push the changes to your fork and submit a pull request to the `main` branch of this repository.
-* We are trying to ensure that every function is documented well and follows the standards set by phpDoc going forward.
-* Finally, please use tabs and not spaces. The tab indent size should be 4 for all code in the repo.
+* Ensure you stick to the [WordPress Coding Standards](https://codex.wordpress.org/WordPress_Coding_Standards)
+* When committing, reference your issue number and include a note about the fix
+* Push the changes to your fork and submit a pull request to the `main` branch
+* Each function should be documented with phpDoc standards
+* Use tabs (not spaces) with a tab indent size of 4
 
 ## Deployment
 
-This WordPress plugin is automatically deployed when a new GitHub release is created from `main`.
+The plugin is automatically deployed to WordPress.org when a new GitHub release is created from the `main` branch. The deployment process:
 
-## Versioning
+1. Minifies CSS and JavaScript files
+2. Generates translation files
+3. Creates a new SVN tag on WordPress.org
+4. Updates the plugin assets and readme on WordPress.org
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see [the releases in this repository](https://github.com/fpcorso/litesurveys-wordpress-plugin/releases).
+## Testing
 
-## Developers
+The plugin includes comprehensive unit tests. Run them using:
 
-* Frank Corso
+```bash
+composer test
+```
 
-See also [the list of contributors](https://github.com/fpcorso/litesurveys-wordpress-plugin/graphs/contributors) who participated in this project.
+For development with WordPress multisite, use:
+
+```bash
+composer test-multisite
+```
 
 ## License
 
-This project is licensed under the GPLv3 License.
+This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## Credits
 
-This is a developer's portal for the LiteSurveys WordPress plugin and should _not_ be used for support. If you need help with LiteSurveys, please [reach out to our team here](https://litesurveys.com/).
+Developed by [Frank Corso](https://github.com/fpcorso)
+
+See also [the list of contributors](https://github.com/fpcorso/litesurveys-wordpress-plugin/graphs/contributors) who participated in this project.
