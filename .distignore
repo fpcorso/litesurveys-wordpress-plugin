@@ -1,6 +1,40 @@
-/.wordpress-org
-/.git
-/.github
-.distignore
-.gitattributes
+# Development files and directories
+.git
+.github
 .gitignore
+.distignore
+.editorconfig
+bin/
+node_modules/
+tests/
+vendor/
+
+# Build files
+package.json
+package-lock.json
+composer.json
+composer.lock
+phpunit.xml
+phpunit-multisite.xml
+
+# GitHub specific files
+README.md
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Build/test configurations
+.eslintrc
+.eslintignore
+.prettierrc
+.stylelintrc
+phpcs.xml
+*.yml
+
+# Temp files
+*.log
+*.sql
+*.zip
+.DS_Store
+Thumbs.db
