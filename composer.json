@@ -1,5 +1,5 @@
 {
-    "name": "litesurveys-wordpress-plugin",
+    "name": "litesurveys/litesurveys-wordpress-plugin",
     "description": "LiteSurveys WordPress Plugin",
     "type": "wordpress-plugin",
     "license": "GPL-3.0-or-later",
