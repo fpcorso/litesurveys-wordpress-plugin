@@ -832,9 +832,10 @@ class LSAPP_LiteSurveys {
 			'litesurveys/litesurveys-wordpress-plugin.php',
 			'litesurveys-wordpress-plugin/litesurveys-wordpress-plugin.php'
 		];
-		if (in_array($plugin_file, $plugin_files)) {
-			$settings_url = sprintf( '<a href="%s">Settings</a>', esc_url( admin_url( 'options-general.php?page=LSAPP_litesurveys' ) ) );
-			$actions = array_merge( ['litesurveys_settings' => $settings_url], $actions) ;
+		if ( in_array( $plugin_file, $plugin_files, true ) ) {
+			$surveys_url = esc_url( admin_url( 'admin.php?page=LSAPP_litesurveys' ) );
+			$surveys_link = sprintf( '<a href="%s">%s</a>', $surveys_url, __( 'Surveys', 'litesurveys' ) );
+			$actions = array_merge( array( 'surveys' => $surveys_link ), $actions );
 		}
 		return $actions;
 	}
