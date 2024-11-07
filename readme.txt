@@ -40,6 +40,7 @@ LiteSurveys is a lightweight WordPress plugin that helps you gather feedback fro
 * **Timing Control** - Set when your survey should appear to visitors
 * **Position Control** - Choose whether your survey appears in the bottom left or bottom right
 * **Active/Inactive States** - Easily activate or deactivate surveys as needed
+* **Submissions Per Page** - Easily see what page the website visitor was on when they submitted the survey
 
 == Installation ==
 1. Log into WordPress
@@ -52,7 +53,7 @@ LiteSurveys is a lightweight WordPress plugin that helps you gather feedback fro
 == Screenshots ==
 
 1. An example LiteSurveys slide-in survey.
-2. The settings page within the WordPress plugin.
+2. Surveys admin page showing your surveys, which are active, and how many submissions each has.
 
 == Changelog ==
 
