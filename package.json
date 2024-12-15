@@ -1,6 +1,6 @@
 {
 	"name": "litesurveys-wordpress-plugin",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"scripts": {
 	  "build": "npm run minify-js && npm run minify-css",
 	  "minify-js": "terser resources/js/admin.js -o resources/js/admin.min.js && terser resources/js/frontend.js -o resources/js/frontend.min.js",
