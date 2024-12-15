@@ -53,6 +53,7 @@ LiteSurveys is a lightweight WordPress plugin that helps you gather feedback fro
 
 1. An example LiteSurveys slide-in survey.
 2. Surveys admin page showing your surveys, which are active, and how many submissions each has.
+3. LiteSurveys admin area for creating a new survey, such as a sales funnel survey.
 
 == Changelog ==
 
