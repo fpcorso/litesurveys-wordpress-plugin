@@ -1,3 +1,9 @@
+#survey-edit-form input[type="text"],
+#survey-edit-form select {
+	width: 100%;
+	max-width: 100%;
+}
+
 .error-message {
 	color: #d63638;
 	margin-top: 5px;
