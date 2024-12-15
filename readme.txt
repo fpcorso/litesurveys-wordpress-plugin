@@ -2,7 +2,7 @@
 Contributors: fpcorso
 Tags: surveys, polls, integration, marketing
 Requires at least: 6.0
-Tested up to: 6.6.1
+Tested up to: 6.7.1
 Stable tag: 2.0.0
 Requires PHP: 8.0
 License: GPLv3
