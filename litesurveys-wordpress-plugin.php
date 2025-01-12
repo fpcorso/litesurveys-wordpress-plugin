@@ -309,30 +309,48 @@ class LSAPP_LiteSurveys {
 				$current_page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
 				$offset       = ( $current_page - 1 ) * $per_page;
 
+				// Get search term if present
+                $search = isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '';
+                $search_where = '';
+                $search_params = array($survey_id);
+
+                if (!empty($search)) {
+                    $search_where = " AND (r.content LIKE %s OR s.page LIKE %s)";
+                    $search_wild = '%' . $wpdb->esc_like($search) . '%';
+                    $search_params[] = $search_wild;
+                    $search_params[] = $search_wild;
+                }
+
 				// Get total count for pagination.
 				$total_items = $wpdb->get_var(
-					$wpdb->prepare(
-						"SELECT COUNT(*) 
-						FROM {$wpdb->prefix}litesurveys_submissions s
-						WHERE s.survey_id = %d AND s.deleted_at IS NULL",
-						$survey_id
-					)
-				);
+                    $wpdb->prepare(
+                        "SELECT COUNT(DISTINCT s.id)
+                        FROM {$wpdb->prefix}litesurveys_submissions s
+                        LEFT JOIN {$wpdb->prefix}litesurveys_responses r ON s.id = r.submission_id
+                        WHERE s.survey_id = %d 
+                        AND s.deleted_at IS NULL" . $search_where,
+                        $search_params
+                    )
+                );
+
+				// Add pagination parameters
+                $search_params[] = $per_page;
+                $search_params[] = $offset;
 
 				// Get submissions with responses.
 				$submissions = $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT s.id, s.created_at, s.page, r.content as response
-						FROM {$wpdb->prefix}litesurveys_submissions s
-						LEFT JOIN {$wpdb->prefix}litesurveys_responses r ON s.id = r.submission_id
-						WHERE s.survey_id = %d AND s.deleted_at IS NULL
-						ORDER BY s.created_at DESC
-						LIMIT %d OFFSET %d",
-						$survey_id,
-						$per_page,
-						$offset
-					)
-				);
+                    $wpdb->prepare(
+                        "SELECT s.id, s.created_at, s.page, r.content as response
+                        FROM {$wpdb->prefix}litesurveys_submissions s
+                        LEFT JOIN {$wpdb->prefix}litesurveys_responses r ON s.id = r.submission_id
+                        WHERE s.survey_id = %d 
+                        AND s.deleted_at IS NULL" . 
+                        $search_where . 
+                        " ORDER BY s.created_at DESC
+                        LIMIT %d OFFSET %d",
+                        $search_params
+                    )
+                );
 
 				// Calculate pagination values.
 				$total_pages = ceil( $total_items / $per_page );
