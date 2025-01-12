@@ -38,7 +38,7 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           extensions: mysql, mysqli
           coverage: xdebug
-          tools: composer, phpunit
+          tools: composer, phpunit, svn
 
       - name: Install dependencies
         run: composer install
