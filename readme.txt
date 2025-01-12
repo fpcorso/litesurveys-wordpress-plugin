@@ -1,6 +1,6 @@
 === LiteSurveys ===
 Contributors: fpcorso
-Tags: surveys, polls, sales, marketing
+Tags: surveys, polls, sales, marketing, popup
 Requires at least: 6.2
 Tested up to: 6.7.1
 Stable tag: 2.0.1
@@ -8,11 +8,11 @@ Requires PHP: 8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Learn from your site visitors using quick surveys.
+Learn from your site visitors using quick, popup surveys.
 
 == Description ==
 
-Learn from your site visitors using quick surveys.
+Learn from your site visitors using quick, popup surveys.
 
 == Description ==
 
