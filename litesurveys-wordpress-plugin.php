@@ -2,7 +2,7 @@
 /**
  * Plugin Name: LiteSurveys
  * Description: Adds simple one-question surveys to your WordPress site
- * Version: 2.0.1
+ * Version: 2.1.0
  * Requires at least: 6.2
  * Requires PHP: 8.0
  * License: GPLv3
@@ -29,7 +29,7 @@ class LSAPP_LiteSurveys {
 	 *
 	 * @var string
 	 */
-	const VERSION = '2.0.1';
+	const VERSION = '2.1.0';
 
 	/**
 	 * The single instance of the class.
