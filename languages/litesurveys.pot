@@ -1,15 +1,15 @@
-# Copyright (C) 2024 LiteSurveys
+# Copyright (C) 2025 LiteSurveys
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: LiteSurveys 2.0.1\n"
+"Project-Id-Version: LiteSurveys 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/litesurveys-wordpress-plugin\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-12-15T19:12:08+00:00\n"
+"POT-Creation-Date: 2025-01-15T16:40:52+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: litesurveys\n"
@@ -31,7 +31,7 @@ msgid "https://litesurveys.com"
 msgstr ""
 
 #: litesurveys-wordpress-plugin.php:289
-#: litesurveys-wordpress-plugin.php:601
+#: litesurveys-wordpress-plugin.php:619
 msgid "Invalid survey ID."
 msgstr ""
 
@@ -39,85 +39,85 @@ msgstr ""
 msgid "Survey not found."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:434
+#: litesurveys-wordpress-plugin.php:452
 msgid "Survey name is required."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:438
+#: litesurveys-wordpress-plugin.php:456
 msgid "Survey question is required."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:468
+#: litesurveys-wordpress-plugin.php:486
 msgid "Invalid settings data."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:485
+#: litesurveys-wordpress-plugin.php:503
 msgid "Multiple choice questions must have at least 2 answers."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:508
+#: litesurveys-wordpress-plugin.php:526
 msgid "Failed to update survey."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:526
+#: litesurveys-wordpress-plugin.php:544
 msgid "Failed to update survey question."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:532
-#: litesurveys-wordpress-plugin.php:547
+#: litesurveys-wordpress-plugin.php:550
+#: litesurveys-wordpress-plugin.php:565
 msgid "Failed to create survey question."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:539
+#: litesurveys-wordpress-plugin.php:557
 msgid "Failed to create survey."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:597
-#: litesurveys-wordpress-plugin.php:674
+#: litesurveys-wordpress-plugin.php:615
+#: litesurveys-wordpress-plugin.php:692
 msgid "Security check failed."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:620
+#: litesurveys-wordpress-plugin.php:638
 msgid "Failed to delete survey."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:678
+#: litesurveys-wordpress-plugin.php:696
 msgid "Invalid submission ID."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:697
+#: litesurveys-wordpress-plugin.php:715
 msgid "Failed to delete submission."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:759
+#: litesurveys-wordpress-plugin.php:777
 msgid "Survey published successfully."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:763
+#: litesurveys-wordpress-plugin.php:781
 msgid "Survey unpublished."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:767
+#: litesurveys-wordpress-plugin.php:785
 msgid "Survey saved successfully."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:771
+#: litesurveys-wordpress-plugin.php:789
 msgid "Survey deleted successfully."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:775
+#: litesurveys-wordpress-plugin.php:793
 msgid "Submission deleted successfully."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:781
+#: litesurveys-wordpress-plugin.php:799
 msgid "An error occurred while processing your request."
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:837
+#: litesurveys-wordpress-plugin.php:855
 msgid "Surveys"
 msgstr ""
 
-#: litesurveys-wordpress-plugin.php:882
+#: litesurveys-wordpress-plugin.php:900
 #: views/admin/survey-edit.php:5
 #: views/admin/survey-submissions.php:5
 #: views/admin/surveys-admin.php:5
@@ -157,29 +157,56 @@ msgstr ""
 msgid "This survey has not received any submissions yet."
 msgstr ""
 
-#: views/admin/survey-submissions.php:29
+#: views/admin/survey-submissions.php:32
+msgid "Search submissions"
+msgstr ""
+
+#: views/admin/survey-submissions.php:36
+msgid "Search submissions..."
+msgstr ""
+
+#: views/admin/survey-submissions.php:39
+msgid "Search Submissions"
+msgstr ""
+
+#: views/admin/survey-submissions.php:48
+msgid "Clear Search"
+msgstr ""
+
+#. translators: 1: Number of results, 2: Search query
+#: views/admin/survey-submissions.php:61
+msgid "%1$s result found for \"%2$s\""
+msgid_plural "%1$s results found for \"%2$s\""
+msgstr[0] ""
+msgstr[1] ""
+
+#: views/admin/survey-submissions.php:72
 msgid "%s submission"
 msgid_plural "%s submissions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: views/admin/survey-submissions.php:63
+#: views/admin/survey-submissions.php:112
 msgid "Submission Time"
 msgstr ""
 
-#: views/admin/survey-submissions.php:64
+#: views/admin/survey-submissions.php:113
 msgid "Answer"
 msgstr ""
 
-#: views/admin/survey-submissions.php:65
+#: views/admin/survey-submissions.php:114
 msgid "Page"
 msgstr ""
 
-#: views/admin/survey-submissions.php:89
+#: views/admin/survey-submissions.php:121
+msgid "No submissions found matching your search."
+msgstr ""
+
+#: views/admin/survey-submissions.php:145
 msgid "Are you sure you want to delete this submission?"
 msgstr ""
 
-#: views/admin/survey-submissions.php:90
+#: views/admin/survey-submissions.php:146
 msgid "Delete"
 msgstr ""
 
