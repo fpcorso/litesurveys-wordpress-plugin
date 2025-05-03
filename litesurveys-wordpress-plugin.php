@@ -2,8 +2,8 @@
 /**
  * Plugin Name: LiteSurveys
  * Description: Adds simple one-question surveys to your WordPress site
- * Version: 2.1.0
- * Requires at least: 6.2
+ * Version: 2.1.1
+ * Requires at least: 6.3
  * Requires PHP: 8.0
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html

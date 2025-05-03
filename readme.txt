@@ -1,9 +1,9 @@
 === LiteSurveys ===
 Contributors: fpcorso
 Tags: surveys, polls, sales, marketing, popup
-Requires at least: 6.2
-Tested up to: 6.7.1
-Stable tag: 2.1.0
+Requires at least: 6.3
+Tested up to: 6.8.1
+Stable tag: 2.1.1
 Requires PHP: 8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -49,6 +49,14 @@ LiteSurveys is a lightweight WordPress plugin that helps you gather feedback fro
 4. Click `Install Now`, then `Activate`
 5. Go to `LiteSurveys` menu to create your surveys
 
+== Frequently Asked Questions ==
+
+= Will it slow down my site? =
+No, LiteSurveys is designed to be lightweight and only loads its assets when needed. It won't impact your site's performance.
+
+= Do I need a paid account? =
+No! LiteSurveys is completely free and open source. There are no paid plans or limits on surveys or responses.
+
 == Screenshots ==
 
 1. An example LiteSurveys slide-in survey.
@@ -56,6 +64,11 @@ LiteSurveys is a lightweight WordPress plugin that helps you gather feedback fro
 3. LiteSurveys admin area for creating a new survey, such as a sales funnel survey.
 
 == Changelog ==
+
+= 2.1.1 (May 4, 2025) =
+
+* Make small design tweaks
+* Bump tested to version to latest WordPress version
 
 = 2.1.0 (January 13, 2025) =
 

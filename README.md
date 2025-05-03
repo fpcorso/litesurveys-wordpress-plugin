@@ -50,12 +50,15 @@ Community made feature requests, patches, localizations, bug reports, and contri
 
 ## Deployment
 
-The plugin is automatically deployed to WordPress.org when a new GitHub release is created from the `main` branch. The deployment process:
+The deployment process is mostly automated for deploying changes to WordPress.org using GitHub actions.
 
+When a commit is pushed to `main`, it:
 1. Minifies CSS and JavaScript files
 2. Generates translation files
-3. Creates a new SVN tag on WordPress.org
-4. Updates the plugin assets and readme on WordPress.org
+
+Then, when a new GitHub release is created from the `main` branch, it:
+1. Creates a new SVN tag on WordPress.org
+2. Updates the plugin assets and readme on WordPress.org
 
 ## Testing
 
@@ -63,12 +66,6 @@ The plugin includes comprehensive unit tests. Run them using:
 
 ```bash
 composer test
-```
-
-For development with WordPress multisite, use:
-
-```bash
-composer test-multisite
 ```
 
 ## License
