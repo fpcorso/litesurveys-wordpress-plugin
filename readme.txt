@@ -49,6 +49,14 @@ LiteSurveys is a lightweight WordPress plugin that helps you gather feedback fro
 4. Click `Install Now`, then `Activate`
 5. Go to `LiteSurveys` menu to create your surveys
 
+== Frequently Asked Questions ==
+
+= Will it slow down my site? =
+No, LiteSurveys is designed to be lightweight and only loads its assets when needed. It won't impact your site's performance.
+
+= Do I need a paid account? =
+No! LiteSurveys is completely free and open source. There are no paid plans or limits on surveys or responses.
+
 == Screenshots ==
 
 1. An example LiteSurveys slide-in survey.
