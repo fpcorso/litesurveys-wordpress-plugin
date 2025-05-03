@@ -3,7 +3,7 @@ Contributors: fpcorso
 Tags: surveys, polls, sales, marketing, popup
 Requires at least: 6.3
 Tested up to: 6.8.1
-Stable tag: 2.2.0
+Stable tag: 2.1.1
 Requires PHP: 8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -64,6 +64,11 @@ No! LiteSurveys is completely free and open source. There are no paid plans or l
 3. LiteSurveys admin area for creating a new survey, such as a sales funnel survey.
 
 == Changelog ==
+
+= 2.1.1 (May 4, 2025) =
+
+* Make small design tweaks
+* Bump tested to version to latest WordPress version
 
 = 2.1.0 (January 13, 2025) =
 
